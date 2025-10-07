@@ -6,7 +6,7 @@ import { Icon } from "astro-icon/components";
 import { getCollection } from "astro:content";
 
 const [staticData] = await getCollection("staticData");
-const { github, githubIconName, linkedin, linkedinIconName } = staticData.data;
+const { github, githubIconName, linkedin, linkedinIconName, alias } = staticData.data;
 
 const currentPath = Astro.url.pathname;
 const routes = ["/", "/portfolio", "/about-me"];
@@ -28,11 +28,10 @@ const navItems = isActiveRoute
     class="relative mx-auto flex max-w-7xl flex-row items-center justify-between max-xl:px-6"
   >
     <a href="/" aria-label="Go to home">
-      <Icon
-        name="logo"
-        class="h-6 cursor-pointer transition-all hover:text-mint-300"
-        aria-hidden="true"
-      />
+      <!-- Replaced logo icon with alias text from your configuration -->
+      <strong class="text-xl h-6 cursor-pointer transition-all hover:text-mint-300">
+        {alias}
+      </strong>
     </a>
 
     <Navigation items={navItems} />
