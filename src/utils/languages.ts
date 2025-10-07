@@ -5,7 +5,6 @@ export interface Language {
 }
 
 export const languages: Record<string, Language> = {
-  // Existing Tech (partial list for context, add remaining if needed)
   angular: {
     name: "Angular",
     iconName: "angular",
@@ -38,60 +37,58 @@ export const languages: Record<string, Language> = {
     name: "Firebase",
     iconName: "firebase",
   },
-  // --- Custom additions for Samiyeel's stack ---
   python: {
     name: "Python",
     iconName: "python",
   },
   java: {
     name: "Java",
-    iconName: "code", // Placeholder: No specific icon in src/icons
+    iconName: "code", 
   },
   cplusplus: {
     name: "C++",
-    iconName: "code", // Placeholder
+    iconName: "code", 
   },
   reactjs: {
     name: "ReactJS",
-    iconName: "code", // Placeholder
+    iconName: "code", 
   },
   flutter: {
     name: "Flutter",
-    iconName: "code", // Placeholder
+    iconName: "code", 
   },
   tensorflow: {
     name: "TensorFlow",
-    iconName: "code", // Placeholder
+    iconName: "code", 
   },
   pytorch: {
     name: "PyTorch",
-    iconName: "code", // Placeholder
+    iconName: "code", 
   },
   numpy: {
     name: "NumPy",
-    iconName: "code", // Placeholder
+    iconName: "code", 
   },
   pandas: {
     name: "Pandas",
-    iconName: "code", // Placeholder
+    iconName: "code", 
   },
   krita: {
     name: "Krita",
-    iconName: "info", // Placeholder for design tool
+    iconName: "info", 
   },
   illustrator: {
     name: "Illustrator",
-    iconName: "info", // Placeholder for design tool
+    iconName: "info", 
   },
   premiere: {
     name: "Premiere Pro",
-    iconName: "info", // Placeholder for design tool
+    iconName: "info", 
   },
   sketchbook: {
     name: "Autodesk SketchBook",
-    iconName: "info", // Placeholder for design tool
+    iconName: "info", 
   },
-  // --- End Custom additions ---
   mongo: {
     name: "MongoDb",
     iconName: "mongo",

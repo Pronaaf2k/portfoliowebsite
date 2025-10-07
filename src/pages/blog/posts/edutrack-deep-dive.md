@@ -4,7 +4,7 @@ title: EDUTrack - Building a Scalable University Records System with Firebase an
 author: Samiyeel Alim Binaaf
 description: "A deep dive into the architecture and development of EDUTrack, a web-based records and data system for North South University, built using React, Vite, Tailwind, and Firebase."
 image:
-  url: "/images/projects/EDUTrack.webp"
+  url: "/images/projects/edutrack.webp"
   alt: "Interface screenshot of the EDUTrack web-based records system."
 pubDate: 2024-11-25
 tags:
