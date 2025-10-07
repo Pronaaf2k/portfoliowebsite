@@ -5,6 +5,7 @@ export interface Language {
 }
 
 export const languages: Record<string, Language> = {
+  // Existing Tech (partial list for context, add remaining if needed)
   angular: {
     name: "Angular",
     iconName: "angular",
@@ -29,6 +30,68 @@ export const languages: Record<string, Language> = {
     name: "JavaScript",
     iconName: "javascript",
   },
+  tailwind: {
+    name: "Tailwind CSS",
+    iconName: "tailwind",
+  },
+  firebase: {
+    name: "Firebase",
+    iconName: "firebase",
+  },
+  // --- Custom additions for Samiyeel's stack ---
+  python: {
+    name: "Python",
+    iconName: "python",
+  },
+  java: {
+    name: "Java",
+    iconName: "code", // Placeholder: No specific icon in src/icons
+  },
+  cplusplus: {
+    name: "C++",
+    iconName: "code", // Placeholder
+  },
+  reactjs: {
+    name: "ReactJS",
+    iconName: "code", // Placeholder
+  },
+  flutter: {
+    name: "Flutter",
+    iconName: "code", // Placeholder
+  },
+  tensorflow: {
+    name: "TensorFlow",
+    iconName: "code", // Placeholder
+  },
+  pytorch: {
+    name: "PyTorch",
+    iconName: "code", // Placeholder
+  },
+  numpy: {
+    name: "NumPy",
+    iconName: "code", // Placeholder
+  },
+  pandas: {
+    name: "Pandas",
+    iconName: "code", // Placeholder
+  },
+  krita: {
+    name: "Krita",
+    iconName: "info", // Placeholder for design tool
+  },
+  illustrator: {
+    name: "Illustrator",
+    iconName: "info", // Placeholder for design tool
+  },
+  premiere: {
+    name: "Premiere Pro",
+    iconName: "info", // Placeholder for design tool
+  },
+  sketchbook: {
+    name: "Autodesk SketchBook",
+    iconName: "info", // Placeholder for design tool
+  },
+  // --- End Custom additions ---
   mongo: {
     name: "MongoDb",
     iconName: "mongo",
@@ -46,17 +109,9 @@ export const languages: Record<string, Language> = {
     name: "Node.js",
     iconName: "node",
   },
-  tailwind: {
-    name: "Tailwind CSS",
-    iconName: "tailwind",
-  },
   figma: {
     name: "Figma",
     iconName: "figma",
-  },
-  firebase: {
-    name: "Firebase",
-    iconName: "firebase",
   },
   markdown: {
     name: "Markdown",
@@ -106,12 +161,8 @@ export const languages: Record<string, Language> = {
     name: "DeepSeek",
     iconName: "deepseek",
   },
-  python: {
-    name: "Python",
-    iconName: "python",
-  },
 };
 
 export const getLanguage = (lang: string): Language => {
-  return languages[lang] || languages.html;
-}; 
+  return languages[lang] || { name: lang, iconName: "info" }; // Fallback
+};

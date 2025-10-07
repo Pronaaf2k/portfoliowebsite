@@ -1,43 +1,35 @@
 ---
 layout:  /src/layouts/ProjectLayout.astro
-title: 'NeonMint'
-pubDate: 2025-04-05
-description: 'NeonMint is a modern, minimalist template crafted for developers and digital creatives.'
-languages: ["astro", "tailwind", "cloudflare", "javascript","vercel"]
-image:
-  url: "/images/projects/neonmint.webp"
-  alt: "Thumbnail of Astro arches."
---- 
-
-**NeonMint** is a modern, minimalist web template created for developers, designers, and digital creatives. This project aims to offer an elegant and functional visual experience, combining a dark-toned aesthetic with mint green accents to highlight content without distractions.
-
-Developed with **Astro** and styled with **TailwindCSS**, NeonMint focuses on speed, modularity, and a component-centered architecture.
-
-## 🧩 Features
-
-- Responsive and minimalist design
-- Dark mode aesthetic with mint green accents
-- Clean and reusable UI components
-- Ideal for portfolios, dashboards or tech landing pages
-- Modern typography and clear visual hierarchy
-- Developed with **Astro**
-- Styled with **TailwindCSS**
-
-## 💡 Technologies used
-
-- Astro
-- TailwindCSS
-- HTML5
-- JavaScript
-
-
-## 🌐 Demo
-
-👉 [View live demo](https://github.com/EFEELE/NeonMint) 
-
-## 🎯 Objective
-
-The purpose of NeonMint is to combine style and functionality in a clean interface that enhances content without overwhelming the user. It's an exercise in design and development focused on visual detail and user experience.
-
-
-🚀 *Developed by EFEELE.*
+  title: 'ACADEMIQ'
+  pubDate: 2025-05-15
+  description: 'AI-powered, scalable student systems for universities (research).'
+  languages: ["html", "tensorflow", "pytorch"]
+  image:
+    url: "/images/projects/academiq.webp"
+    alt: "Placeholder image for ACADEMIQ AI system interface"
+  --- 
+  
+  **ACADEMIQ** is a research-focused project aimed at designing AI-powered, scalable student management systems for higher education institutions. The core idea is to leverage machine learning models to predict student performance, personalize learning paths, and automate administrative overhead.
+  
+  Developed with an emphasis on **AI Concepts** and front-end mockups, the project demonstrates how modern AI/ML frameworks can be integrated into traditional EdTech infrastructure.
+  
+  ## 🧩 Focus Areas
+ 
+  - **Predictive Analytics:** Developing models to forecast student success and identify at-risk learners.
+  - **Scalability:** Researching architectural patterns that allow the system to handle a large user base.
+ - **AI-Integration:** Utilizing Python-based deep learning (TensorFlow, PyTorch) for core intelligence features.
+  
+ ## 💡 Technologies used
+  
+ - **AI/ML Frameworks:** TensorFlow, PyTorch, Custom ML Algorithms
+ - **Language:** Python
+ - **Frontend Mockup:** HTML/CSS
+  
+  
+  ## 🔗 Repository
+  
+  👉 [View on GitHub](https://github.com/Pronaaf2k/ACADEMIQ) 
+  
+  
+  🚀 *A research prototype by Samiyeel Alim Binaaf.*
+ 
