@@ -7,12 +7,18 @@ import NavArticle from "../components/layout/NavArticle.astro";
 import ListPosts from "../components/blog/ListPosts.astro";
 import NavigationArticles from "../components/layout/NavigationArticles.astro";
 import Share from "../components/ui/Share.astro";
+import Heading from "../components/ui/Heading.astro";
+import { getCollection } from "astro:content";
+
 const { frontmatter } = Astro.props;
 const currentUrl = `${Astro.site}${Astro.url.pathname}`;
 const tweetText = encodeURIComponent(
   `"${frontmatter.title}" - by ${frontmatter.author} | EFEELE`
 );
-import Heading from "../components/ui/Heading.astro";
+
+const [staticData] = await getCollection("staticData");
+const { profileImage, profileAlt, alias } = staticData.data;
+
 ---
 
 <script>
@@ -93,16 +99,16 @@ import Heading from "../components/ui/Heading.astro";
         >
           <div class="white flex items-center gap-4">
             <div
-              aria-label="Photo of Fernando Aldair López Ponce (EFEELE) for the blog"
+              aria-label={profileAlt}
               class="size-10 bg-cover bg-center rounded-full drop-shadow-lg"
-              style="background-image: url(/images/efeeleprofile.webp);"
+              style={`background-image: url(${profileImage});`}
             >
             </div>
             <a
               id={frontmatter.title}
               class="leading-0 text-sm font-semibold items-center gap-3 text-blacktext dark:text-riptide-50"
-              href="/blog"
-              >{frontmatter.author}
+              href="/about-me"
+              >{frontmatter.author || alias}
             </a>
           </div>
           <Share currentUrl={currentUrl} tweetText={tweetText} />

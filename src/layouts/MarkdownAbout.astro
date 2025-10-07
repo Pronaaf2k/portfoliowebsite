@@ -6,7 +6,18 @@ import Experience from "../components/portfolio/Experience.astro";
 import NavArticle from "../components/layout/NavArticle.astro";
 import Contact from "../components/portfolio/Contact.astro";
 import Tools from "../components/portfolio/Tools.astro";
+import { getCollection } from "astro:content";
+
 const { frontmatter } = Astro.props;
+const [staticData] = await getCollection("staticData");
+const {
+  profileImage,
+  profileAlt,
+  profileLink,
+  profileName,
+  profileTitle,
+} = staticData.data;
+
 ---
 
 <script>
@@ -44,11 +55,12 @@ const { frontmatter } = Astro.props;
               </div>
               <div class="relative z-20 flex w-full rounded-full bg-mint-900">
                 <div
-                  class="w-full aspect-square rounded-full bg-[url(/images/efeeleprofile.webp)] bg-center bg-cover"
-                  aria-label="Photo of Fernando Aldair López Ponce (EFEELE) for the blog"
+                  class="w-full aspect-square rounded-full bg-center bg-cover"
+                  style={`background-image: url(${profileImage})`}
+                  aria-label={profileAlt}
                 >
                   <a
-                    href="/about-me"
+                    href={profileLink}
                     class="flex h-full w-full"
                     aria-label="View about me page"></a>
                 </div>
@@ -58,20 +70,23 @@ const { frontmatter } = Astro.props;
 
           <div class="w-full flex flex-col justify-center gap-4 max-md:gap-2">
             <div class="text-center">
-              <Heading textGradient="Fernando López | EFEELE" />
+              <Heading textGradient={profileName} />
             </div>
 
-            <p
+            <!-- This text is hardcoded in the original template's MarkdownAbout, 
+                 but is now dynamically pulled from the About-me Markdown's frontmatter 
+                 by the calling file, and the intro paragraph should be there, 
+                 so we use the frontmatter title/name for consistency.
+                 The full intro text should be in the Markdown content.
+            -->
+             <p
               class="text-lg max-xl:text-base text-blacktext dark:text-gray-200 mb-0 leading-8 font-semibold"
             >
               <b
                 class="bg-linear-to-r from-riptide-400 to-mint-500 dark:to-mint-200 dark:from-riptide-300 text-transparent bg-clip-text"
-                >Frontend Developer</b
-              > with <b
-                class="bg-linear-to-r from-riptide-400 to-mint-500 dark:to-mint-200 dark:from-riptide-300 text-transparent bg-clip-text"
-                >8 years of experience</b
-              >, passionate about development, technology, and coffee that
-              sparks ideas. I love bringing digital projects to life. 🚀☕
+                >{profileTitle}</b
+              >
+              
             </p>
           </div>
         </div>
@@ -86,20 +101,11 @@ const { frontmatter } = Astro.props;
     </article>
     <NavArticle title={frontmatter.title} />
   </section>
-  <section class="py-8 px-8 max-md:py-4 mb-4 scroll-m-16" id="experience">
-    <div class="flex flex-col gap-8 pt-8 max-w-4xl mx-auto">
-      <div class="flex gap-4 items-center justify-center">
-        <Icon class="text-3xl text-white" name="briefcase" />
-        <Heading text="Experience" textGradient="Work" level={2} />
-      </div>
-
-      <Experience />
-    </div>
-  </section>
+  <Experience />
   <section class="py-8 px-8 max-md:py-4 mt-10 mb-20 scroll-m-16" id="sttack">
     <div class="flex flex-col gap-8 max-w-3xl justify-center mx-auto">
       <div class="flex gap-4 items-center justify-center">
-        <Icon class="text-3xl text-white" name="dashboard" />
+        <Icon class="text-3xl dark:text-white text-blacktext" name="dashboard" />
         <Heading text="Stack" textGradient="Technological" level={2} />
       </div>
       <Tools variant="center" />
