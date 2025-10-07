@@ -15,12 +15,15 @@ const {
   profileTitle,
   email,
   emailIconName,
-  github,
-  githubrecent, // ADDED: Destructure githubrecent
+  github, // We will use this one
+  githubText,
   portfolioImage,
   contactSectionButtonText,
   hobbies, // Include hobbies to pull some interest data
 } = staticData.data;
+
+// Overwrite the github variable specifically for the project card's link
+const projectCardLink = "https://github.com/Pronaaf2k/ACADEMIQ/";
 ---
 
 <section
@@ -120,14 +123,15 @@ const {
     <div
       class="col-start-1 row-start-2 rounded-2xl bg-linear-to-r from-mint-300 dark:from-mint-600 to-mint-50 dark:to-mint-200/5 hover:to-mint-300/30 dark:hover:to-mint-600/30 p-[.2rem] transition-all ease-in duration-150 hover:scale-105 hover:shadow-[0_20px_50px_rgba(13,188,130,0.4)] z-40 md:col-start-3"
     >
-      <div class="h-full w-full overflow-hidden rounded-2xl dark:bg-zinc-900">
-        <div
-          class="relative h-full w-full overflow-hidden rounded-2xl bg-linear-to-tr from-riptide-100 to-white dark:from-transparent dark:bg-linear-to-bl dark:to-transparent"
-        >
-          <a
-            target="_blank"
-            href={githubrecent}
-            aria-label="View this site's code repository on GitHub"
+      <a
+        target="_blank"
+        href={projectCardLink} /* CHANGED: Using overwritten variable 'projectCardLink' */
+        aria-label="View the project repository on GitHub"
+        class="h-full w-full flex flex-col"
+      >
+        <div class="h-full w-full overflow-hidden rounded-2xl dark:bg-zinc-900">
+          <div
+            class="relative h-full w-full overflow-hidden rounded-2xl bg-linear-to-tr from-riptide-100 to-white dark:from-transparent dark:bg-linear-to-bl dark:to-transparent"
           >
             <div
               class="relative flex h-full flex-col gap-8 p-8 dark:before:bg-[radial-gradient(circle,rgba(13,188,130)_0,rgba(1,45,34)_100%)] before:bg-[radial-gradient(circle,rgba(95,255,202)_0,rgba(144,253,210)_100%)] before:absolute before:left-30 before:bottom-30 before:h-[30%] before:aspect-square before:rounded-full before:blur-3xl before:opacity-90 before:transition before:z-0 max-xl:p-5 max-md:p-4 xl:before:bottom-10"
@@ -142,9 +146,9 @@ const {
                 aria-hidden="true"
               />
             </div>
-          </a>
+          </div>
         </div>
-      </div>
+      </a>
     </div>
 
     <div
