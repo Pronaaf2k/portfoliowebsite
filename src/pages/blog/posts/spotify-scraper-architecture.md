@@ -4,7 +4,7 @@ title: Spotifyscraper Architecting a Highly Selective Music Discovery Engine
 author: Samiyeel Alim Binaaf
 description: "A technical review of implementing multi-layered demographic exclusion filters and state management for scalable music artist discovery using the Spotify API in Python."
 image:
-  url: "/images/projects/spotifyscrapper.webp"
+  url: "/images/projects/spotifyscraper.webp"
   alt: "Abstract image representing data filtering and categorization."
 pubDate: 2025-07-15
 tags:
