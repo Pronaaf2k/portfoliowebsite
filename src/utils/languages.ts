@@ -158,6 +158,10 @@ export const languages: Record<string, Language> = {
     name: "DeepSeek",
     iconName: "deepseek",
   },
+  requests: {
+    name: "Requests (Python)",
+    iconName: "python", // Using Python icon as Requests is a Python library
+  },
 };
 
 export const getLanguage = (lang: string): Language => {

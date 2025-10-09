@@ -1,17 +1,17 @@
 ---
 layout: /src/layouts/MarkdownPostLayout.astro
-title: Spotifyscraper: Architecting a Highly Selective Music Discovery Engine
+title: Spotifyscraper Architecting a Highly Selective Music Discovery Engine
 author: Samiyeel Alim Binaaf
 description: "A technical review of implementing multi-layered demographic exclusion filters and state management for scalable music artist discovery using the Spotify API in Python."
 image:
-  url: "/images/projects/spotifyscraper.webp"
+  url: "/images/blogimage.webp"
   alt: "Abstract image representing data filtering and categorization."
 pubDate: 2025-07-15
 tags:
   [
     "Python", "Data-Scraping", "API-Integration", "State-Management", "Data-Filtering"
   ]
-languages: ["python", "javascript", "markdown", "requests"]
+languages: ["python", "requests", "markdown"]
 ---
 
 The **Spotifyscraper** project was born from the need for highly specific, high-precision artist identification on Spotify. This required solving two major technical hurdles: maintaining efficiency across multiple scraping runs, and implementing a rigorous, multi-faceted exclusion system.
