@@ -2,7 +2,7 @@
 layout: /src/layouts/ProjectLayout.astro
 title: 'Spotify Targeted Scraper'
 pubDate: 2025-07-10
-description: 'A Python tool for specialized music research, identifying emerging artists globally while rigorously filtering specific demographics (South/Southeast Asian, African, and Muslim communities).'
+description: 'A Python tool for specialized music research, identifying emerging artists globally while rigorously filtering specific demographics.'
 languages: ["python", "requests", "git", "markdown"]
 image:
   url: "/images/projects/spotifyscraper.webp"
