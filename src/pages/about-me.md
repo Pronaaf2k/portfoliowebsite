@@ -26,9 +26,13 @@
  
  I am deeply committed to developing **Inclusive EdTech** solutions and specialized **accessibility applications**. Projects like **QuickSight** (an accessibility app for colorblind and visually impaired users) are central to my portfolio, aiming to make digital content universally accessible.
  
- ## 🛠️ Projects and Contributions
- 
- A significant part of my learning comes from building things. I've developed a range of projects from data pipelines to deep-learning models. You can find detailed descriptions of my featured work like **EDUTrack**, **ACADEMIQ**, and **SuperResAI** in my projects section.
+## 🏆 Recent Achievements
+
+I recently participated in the Solvio AI Hackathon 2025 and achieved a **top 20 ranking out of 900 competing teams**—a significant milestone in my first hackathon experience. This achievement reinforced my commitment to building innovative solutions and working effectively in collaborative, high-pressure environments.
+
+## 🛠️ Projects and Contributions
+
+A significant part of my learning comes from building things. I've developed a range of projects from data pipelines to deep-learning models. You can find detailed descriptions of my featured work like **EDUTrack**, **ACADEMIQ**, and **SuperResAI** in my projects section.
  
  I believe in continuous learning, which means diving into new libraries, exploring different programming paradigms with languages like **Java** and **C++**, and leveraging data tools like **NumPy** and **Pandas** for processing and analysis.
  
