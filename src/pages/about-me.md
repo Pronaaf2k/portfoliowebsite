@@ -1,45 +1,55 @@
 ---
- layout: /src/layouts/MarkdownAbout.astro
- title: "Samiyeel's Journey | AI/ML & Full-Stack Development at North South University"
- description: "CSE undergrad at North South University passionate about AI/ML, accessibility, and full-stack web. Discover my projects and technical journey."
- author: "Samiyeel Alim Binaaf"
- image:
+layout: /src/layouts/MarkdownAbout.astro
+title: "Samiyeel's Journey | AI/ML & Full-Stack Development at North South University"
+description: "CSE undergrad at North South University — AI/ML, accessibility, full-stack web, and production billing systems. Projects include VoloLeads, EDUTrack, ACADEMIQ, and QuickSight."
+author: "Samiyeel Alim Binaaf"
+image:
   url: "/images/samiyeel-profile.webp"
-   
 ---
 
- I am Samiyeel, a Computer Science and Engineering (CSE) undergraduate at **North South University**, driven by a passion for **AI/ML, digital accessibility, and full-stack web development**. My focus is on building practical, impactful, and inclusive software solutions.
+I am **Samiyeel Alim Binaaf**, a Computer Science and Engineering undergraduate at **North South University**. I build at the intersection of **AI/ML, accessibility, and full-stack web development** — from research prototypes to production applications that ship on real domains.
 
- ## 🧑‍💻 My Expertise and Focus
- 
- My work revolves around merging technology with social impact. This is reflected in the main areas I focus on:
- 
- ### 🤖 Artificial Intelligence and Machine Learning
- 
- I constantly explore and experiment with deep learning architectures. This involves training models using **TensorFlow** and **PyTorch**, primarily focusing on computer vision and natural language processing tasks. My goal is to use AI not just for complex calculations, but for solving real-world problems, such as accessibility challenges.
+## What I do
 
- ### 🌐 Full-Stack Web Development
- 
- I build robust and scalable web applications from front to back. I am proficient in **React** for dynamic user interfaces and utilize frameworks like **Flutter** for cross-platform mobile development. My preferred backend tools include **Firebase** for rapid prototyping and deployment, with strong skills in **JavaScript/TypeScript** and **Python** for core logic and data handling.
- 
- ### ♿ Accessibility and EdTech
- 
- I am deeply committed to developing **Inclusive EdTech** solutions and specialized **accessibility applications**. Projects like **QuickSight** (an accessibility app for colorblind and visually impaired users) are central to my portfolio, aiming to make digital content universally accessible.
- 
-## 🏆 Recent Achievements
+### Production full-stack web
 
-I recently participated in the Solvio AI Hackathon 2025 and achieved a **top 20 ranking out of 900 competing teams**—a significant milestone in my first hackathon experience. This achievement reinforced my commitment to building innovative solutions and working effectively in collaborative, high-pressure environments.
+My most recent client work is **[VoloLeads](https://vololeads.com)** — a live HTML/Tailwind website that needed subscription billing without a framework rewrite. I delivered:
 
-## 🛠️ Projects and Contributions
+- **Frontend:** checkout flow, subscription pages, Stripe integration on the static site
+- **Backend:** Node/Express API, webhooks, PostgreSQL, SMTP emails, billing portal
+- **Ops:** cPanel deployment, test/live Stripe modes, documentation, and ongoing iteration
 
-A significant part of my learning comes from building things. I've developed a range of projects from data pipelines to deep-learning models. You can find detailed descriptions of my featured work like **EDUTrack**, **ACADEMIQ**, and **SuperResAI** in my projects section.
- 
- I believe in continuous learning, which means diving into new libraries, exploring different programming paradigms with languages like **Java** and **C++**, and leveraging data tools like **NumPy** and **Pandas** for processing and analysis.
- 
- ## 🎨 Design & Creativity
- 
- Beyond the code, I use tools like **Krita**, **Adobe Illustrator**, and **Adobe Premiere Pro** for design and content creation. A keen eye for design ensures my applications are not only functional but also intuitive and visually appealing.
+That project covers the full path from "Subscribe" click → Stripe Checkout → webhook → database → confirmation email.
 
- I'm Samiyeel Alim Binaaf, and I'm always looking for the next challenge that combines technical complexity with meaningful impact.
- 
- ## Let's Connect! 🚀
+### AI/ML & computer vision
+
+I experiment with deep learning using **TensorFlow** and **PyTorch** — image super-resolution (**SuperResAI**), research systems (**ACADEMIQ**), and data tooling (**Spotify Targeted Scraper**). I care about applying ML to real problems, not just benchmarks.
+
+### Accessibility & EdTech
+
+**QuickSight** is an accessibility app for colorblind and visually impaired users (Flutter, Python, AI image-to-text). **EDUTrack** is a web records system for NSU students (React, Vite, Tailwind, Firebase). Both reflect my focus on **inclusive, practical software**.
+
+## Experience highlights
+
+- **Full-Stack Developer (Contract) · VoloLeads** — Stripe billing stack on a live static site
+- **Top 20 / 900 · Solvio AI Hackathon 2025** (Sheba.xyz & SheSTEM)
+- **Former CMO · Discount Den** — marketing strategy, branding, and growth
+- **Private tutor** — Cambridge O-Level & Pre O-Level (since 2022)
+
+## Stack I work with
+
+**Languages:** Python, JavaScript, TypeScript, Java, C++  
+**Web:** React, Node.js, Express, Tailwind CSS, HTML/CSS  
+**Data & payments:** PostgreSQL, Firebase, Stripe, REST APIs, webhooks  
+**ML:** TensorFlow, PyTorch, NumPy, Pandas  
+**Tools:** Git, Vercel, Netlify, Cloudflare, cPanel  
+
+## Beyond the code
+
+I use **Krita**, **Illustrator**, and **Premiere Pro** for design and content. I enjoy gaming, building side projects, and shipping things that actually get used.
+
+---
+
+**Portfolio:** [samiyeelalim.com](https://samiyeelalim.com) · **LinkedIn:** [samiyeelalimbinaaf](https://www.linkedin.com/in/samiyeelalimbinaaf/) · **GitHub:** [Pronaaf2k](https://github.com/Pronaaf2k)
+
+Let's connect if you're working on AI/ML, accessible EdTech, or production web apps.

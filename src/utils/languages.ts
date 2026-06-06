@@ -106,6 +106,18 @@ export const languages: Record<string, Language> = {
     name: "Node.js",
     iconName: "node",
   },
+  express: {
+    name: "Express.js",
+    iconName: "node",
+  },
+  postgresql: {
+    name: "PostgreSQL",
+    iconName: "mysql",
+  },
+  stripe: {
+    name: "Stripe",
+    iconName: "code",
+  },
   figma: {
     name: "Figma",
     iconName: "figma",

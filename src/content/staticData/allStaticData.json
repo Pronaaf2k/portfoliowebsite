@@ -5,7 +5,9 @@
   "profileTitle": "AI/ML Engineer & Full-Stack Developer",
   "profileName": "Samiyeel",
   "github": "https://github.com/Pronaaf2k",
-  "projectCardLink":"https://github.com/Pronaaf2k/ACADEMIQ/", 
+  "projectCardLink": "https://vololeads.com",
+  "featuredProjectLabel": "Latest client work",
+  "projectCardImage": "/images/projects/vololeads.png",
   "githubText": "Check out my recent projects on GitHub",
   "portfolioImage": "/images/portfolio.webp",
   "email": "benaaf2000@gmail.com",
@@ -25,14 +27,14 @@
   "emailIconName": "envelope",
   "hobbies": [
     "AI/ML",
-    "Accessibility",
     "Full-Stack Web",
+    "Accessibility",
+    "Payments & SaaS",
     "Deep Learning",
-    "Inclusive EdTech",
-    "Gaming"
+    "Inclusive EdTech"
   ],
-  "pageTitle": "Samiyeel Alim Binaaf | AI/ML Engineer & Full-Stack Developer", 
-  "pageDescription": "CSE undergraduate specializing in AI/ML, accessibility, and full-stack web development.",
+  "pageTitle": "Samiyeel Alim Binaaf | AI/ML Engineer & Full-Stack Developer",
+  "pageDescription": "CSE undergrad at North South University. Full-stack developer — AI/ML, accessibility, EdTech, and production web apps including Stripe billing for VoloLeads.",
   "OGImage": {
     "url": "/images/imagedefault.webp",
     "alt": "Samiyeel Alim Binaaf's portfolio screenshot, highlighting AI/ML and web development skills."
