@@ -1,27 +1,34 @@
-# build output
-dist/
-
-# vscode settings
-.vscode/
-
-# generated types
-.astro/
+# Next.js output
+.next/
+out/
 
 # dependencies
 node_modules/
 
+# environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
 # logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# environment variables
-.env
-.env.production
-
-# macOS-specific files
+# editor and OS files
+.vscode/
+.idea/
 .DS_Store
 
-# jetbrains setting folder
-.idea/
+# deployment
+.vercel/
+
+# local agent tooling and build caches
+.agents/
+skills-lock.json
+*.tsbuildinfo

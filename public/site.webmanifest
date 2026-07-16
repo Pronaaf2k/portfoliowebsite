@@ -1,1 +1,24 @@
-{"name":"","short_name":"","icons":[{"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#ffffff","background_color":"#ffffff","display":"standalone"}
+{
+  "name": "Samiyeel Alim Binaaf / Pronaaf2k",
+  "short_name": "Samiyeel",
+  "description": "The official full-stack, AI/ML, music, and esports portfolio of Samiyeel Alim Binaaf, known online as Pronaaf2k.",
+  "start_url": "/",
+  "id": "/",
+  "scope": "/",
+  "lang": "en",
+  "display": "standalone",
+  "background_color": "#090b0d",
+  "theme_color": "#090b0d",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
