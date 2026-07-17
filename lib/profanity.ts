@@ -4,6 +4,7 @@ const NON_TOKEN_CHARACTER = /[^\p{L}\p{M}\p{N}@$!]+/gu;
 const REPEATED_CHARACTER = /(.)\1{2,}/gu;
 
 const ENGLISH_PROFANITY = new Set([
+  "anal",
   "asshole",
   "assholes",
   "bastard",
@@ -16,6 +17,8 @@ const ENGLISH_PROFANITY = new Set([
   "dick",
   "dickhead",
   "dickheads",
+  "dildo",
+  "dildos",
   "douchebag",
   "douchebags",
   "faggot",
@@ -36,6 +39,9 @@ const ENGLISH_PROFANITY = new Set([
   "prick",
   "pussy",
   "pussies",
+  "sex",
+  "sexual",
+  "sexy",
   "retard",
   "retarded",
   "retards",
@@ -72,12 +78,38 @@ const BANGLA_PROFANITY = new Set([
   "মাগি",
   "বাঞ্চোদ",
   "বেশ্যা",
+  "যৌন",
+  "সেক্স",
+  "স্তন",
+  "লিঙ্গ",
+  "ধোন",
+  "ধন",
+  "পুটকি",
+  "হোগা",
+  "নুনু",
+  "চুচি",
+  "চুদানি",
+  "চোদন",
+  "মাগীর",
+  "কুত্তারবাচ্চা",
+  "শুয়োরেরবাচ্চা",
 ]);
 
 const BANGLISH_PROFANITY = new Set([
+  "bal",
   "balchal",
   "banchod",
+  "bainchod",
+  "bainchud",
+  "benchod",
+  "benchud",
   "behenchod",
+  "behenchud",
+  "besha",
+  "beshya",
+  "bessa",
+  "bessha",
+  "besshya",
   "bokachoda",
   "chod",
   "choda",
@@ -93,18 +125,68 @@ const BANGLISH_PROFANITY = new Set([
   "khanki",
   "madarchod",
   "madarchoda",
+  "sex",
+  "sexy",
+  "jouno",
+  "lingo",
+  "dhon",
+  "nunu",
+  "putki",
+  "hoga",
+  "magi",
+  "magir",
+  "shart",
+  "kuttarbaccha",
+  "kuttarbacha",
+  "shuorerbaccha",
+  "shuorerbacha",
 ]);
 
 const BLOCKED_FRAGMENTS = [
+  "sex",
+  "porn",
+  "dildo",
+  "blowjob",
+  "handjob",
+  "rimjob",
   "motherfuck",
   "madarchod",
   "behenchod",
+  "behenchud",
+  "bainchod",
+  "bainchud",
+  "benchod",
+  "benchud",
   "banchod",
+  "banchud",
   "bokachod",
+  "beshya",
+  "bessha",
   "মাদারচোদ",
   "বোকাচোদ",
   "খানকির",
   "চোদাচুদি",
+  "চুদ",
+  "চোদ",
+  "সেক্স",
+  "পুটকি",
+  "কুত্তারবাচ্চা",
+];
+
+const BLOCKED_PHRASES = [
+  "suck my",
+  "send nudes",
+  "nude pic",
+  "naked pic",
+  "ফাক ইউ",
+  "তোর মায়ের",
+  "তোর মায়ের",
+  "তোর বাপের",
+  "মাগীর পোলা",
+  "মাগির পোলা",
+  "tor mayer",
+  "tor maier",
+  "magir pola",
 ];
 
 function canonicalLatinToken(value: string) {
@@ -136,7 +218,17 @@ function candidateTokens(value: string) {
 }
 
 export function containsProfanity(value: string) {
-  for (const token of candidateTokens(value)) {
+  const normalized = value
+    .normalize("NFKC")
+    .toLocaleLowerCase("en-US")
+    .replace(ZERO_WIDTH_CHARACTERS, "")
+    .replace(/\s+/gu, " ")
+    .trim();
+  const tokens = candidateTokens(normalized);
+
+  if (BLOCKED_PHRASES.some((phrase) => normalized.includes(phrase))) return true;
+
+  for (const token of tokens) {
     const canonical = canonicalLatinToken(token);
 
     if (
@@ -149,6 +241,19 @@ export function containsProfanity(value: string) {
     ) {
       return true;
     }
+  }
+
+  // Catch deliberate spacing/punctuation evasions such as "s e x" or "f.u.c.k".
+  const compactLatin = canonicalLatinToken(
+    normalized.replace(/[^a-z0-9@$!]+/gu, ""),
+  );
+  if (
+    compactLatin.length >= 3 &&
+    BLOCKED_FRAGMENTS.some(
+      (fragment) => /^[a-z]+$/u.test(fragment) && compactLatin.includes(fragment),
+    )
+  ) {
+    return true;
   }
 
   return false;
