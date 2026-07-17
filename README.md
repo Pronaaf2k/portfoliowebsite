@@ -47,18 +47,23 @@ SPOTIFY_PLAYLIST_IDS=playlist_id_one,playlist_id_two
 MUSIC_EXCHANGE_SECRET=a-long-random-secret
 ```
 
-For the live current-track card, add `http://127.0.0.1:3000/api/spotify/callback` to the Spotify app's redirect URIs, then open `/api/spotify/connect` locally and approve the `user-read-currently-playing` scope. The development-only callback stores the refresh token in ignored `.env.local`; the helper returns 404 in production.
+For the live current-track card, register both `http://127.0.0.1:3000/api/spotify/callback` and `https://samiyeelalim.com/api/spotify/callback` in the Spotify app. Keep `SPOTIFY_REDIRECT_URI` on the local URL while running the one-time `/api/spotify/connect` flow and approving the `user-read-currently-playing` scope. The development-only callback stores the refresh token in ignored `.env.local`; it intentionally returns 404 in production, where the saved refresh token is supplied through Vercel instead.
 
 When used for private playlists, the refresh token must also be authorized to read every configured playlist; include `playlist-read-private` and the appropriate collaborative-playlist scope when needed. Song notes are revalidated against Spotify and rate limited to five submissions per fingerprint per hour. The public pinboard returns only track metadata, sender, note, and timestamp; Redis credentials, Spotify secrets, fingerprints, and internal inbox fields never leave the server.
 
 ### Aim Challenge and Upstash retention
 
 ```bash
-UPSTASH_REDIS_REST_URL=
-UPSTASH_REDIS_REST_TOKEN=
+KV_REST_API_URL=
+KV_REST_API_TOKEN=
+KV_REST_API_READ_ONLY_TOKEN=
+KV_URL=
+REDIS_URL=
 AIM_GAME_SECRET=a-different-long-random-secret
 CRON_SECRET=another-long-random-secret
 ```
+
+The app uses `KV_REST_API_URL` and the write-capable `KV_REST_API_TOKEN` for its HTTP Redis helper. `KV_REST_API_READ_ONLY_TOKEN` can remain provisioned, while `KV_URL` and `REDIS_URL` are Redis-protocol connection strings for other clients. Existing local environments using `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` remain supported as a fallback.
 
 The 15-second drill ranks clean hits first and accuracy second. Accepted scores are written to an append-only stream, a weekly sorted set, a persistent all-time set, and two-year score records. The Vercel cron runs daily at 18:05 UTC, writes a heartbeat to the shared database, and snapshots a completed week on Monday in Dhaka time.
 

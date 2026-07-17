@@ -6,11 +6,15 @@ type UpstashResponse<T> = {
 };
 
 function getConfiguration() {
-  const url = process.env.UPSTASH_REDIS_REST_URL?.replace(/\/$/, "");
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url = (
+    process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL
+  )?.replace(/\/$/, "");
+  const token =
+    process.env.KV_REST_API_TOKEN ??
+    process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (!url || !token) {
-    throw new Error("Upstash Redis is not configured");
+    throw new Error("Upstash KV REST API is not configured");
   }
 
   return { url, token };
@@ -18,8 +22,9 @@ function getConfiguration() {
 
 export function isUpstashConfigured() {
   return Boolean(
-    process.env.UPSTASH_REDIS_REST_URL &&
-      process.env.UPSTASH_REDIS_REST_TOKEN,
+    (process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL) &&
+      (process.env.KV_REST_API_TOKEN ??
+        process.env.UPSTASH_REDIS_REST_TOKEN),
   );
 }
 
