@@ -11,6 +11,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       images: [SITE_URL + "/images/samiyeel-profile.webp"],
     },
     {
+      url: SITE_URL + "/about-me",
+      lastModified,
+      images: [SITE_URL + "/images/samiyeel-profile.webp"],
+    },
+    {
       url: SITE_URL + "/loadout",
       lastModified,
     },

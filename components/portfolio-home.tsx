@@ -301,7 +301,11 @@ export function PortfolioHome() {
           </div>
         </section>
 
-        <section className="story-section section" aria-labelledby="story-title">
+        <section
+          className="story-section section"
+          id="about"
+          aria-labelledby="story-title"
+        >
           <div className="shell story-layout">
             <ScrollReveal className="story-intro">
               <p className="eyebrow">Builder log</p>
