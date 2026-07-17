@@ -14,7 +14,7 @@ import {
   Send,
   Shuffle,
 } from "lucide-react";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import type {
   MusicDropResponse,
   MusicPin,
@@ -88,6 +88,7 @@ export function MusicExchange() {
   const [pins, setPins] = useState<MusicPin[]>([]);
   const [pinState, setPinState] = useState<RequestState>("loading");
   const pinRailRef = useRef<HTMLDivElement>(null);
+  const activeSearchRef = useRef<AbortController | null>(null);
 
   const loadPins = async () => {
     try {
@@ -206,26 +207,32 @@ export function MusicExchange() {
       rail.removeEventListener("click", preventDraggedClick, true);
     };
   }, []);
-  const searchTracks = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const value = query.trim();
+
+  const searchTracks = useCallback(async (rawQuery: string) => {
+    const value = rawQuery.trim();
 
     if (value.length < 2) {
-      setSearchState("error");
-      setSearchMessage("Type at least two characters");
+      setResults([]);
+      setSearchState("idle");
+      setSearchMessage(value ? "Type at least two characters" : "Waiting for a track");
       return;
     }
 
+    activeSearchRef.current?.abort();
+    const controller = new AbortController();
+    activeSearchRef.current = controller;
     setSearchState("loading");
     setSearchMessage("Reading the Spotify catalogue");
 
     try {
       const response = await fetch("/api/music/search?q=" + encodeURIComponent(value), {
         cache: "no-store",
+        signal: controller.signal,
       });
       const payload = (await response.json()) as MusicSearchResponse;
 
       if (!response.ok) throw new Error(getError(payload, "Search is unavailable"));
+      if (controller.signal.aborted) return;
 
       setResults(payload.tracks);
       setSearchState("success");
@@ -233,10 +240,41 @@ export function MusicExchange() {
         payload.tracks.length ? payload.tracks.length + " matches" : "No matching tracks",
       );
     } catch (error) {
+      if (controller.signal.aborted) return;
       setResults([]);
       setSearchState("error");
       setSearchMessage(error instanceof Error ? error.message : "Search is unavailable");
+    } finally {
+      if (activeSearchRef.current === controller) activeSearchRef.current = null;
     }
+  }, []);
+
+  useEffect(() => {
+    activeSearchRef.current?.abort();
+    const value = query.trim();
+    if (value.length < 2) return;
+
+    const timer = window.setTimeout(() => void searchTracks(value), 250);
+    return () => window.clearTimeout(timer);
+  }, [query, searchTracks]);
+
+  useEffect(() => () => activeSearchRef.current?.abort(), []);
+
+  const updateQuery = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setQuery(value);
+
+    if (value.trim().length < 2) {
+      activeSearchRef.current?.abort();
+      setResults([]);
+      setSearchState("idle");
+      setSearchMessage(value.trim() ? "Type at least two characters" : "Waiting for a track");
+    }
+  };
+
+  const submitSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void searchTracks(query);
   };
 
   const chooseTrack = (track: MusicTrack) => {
@@ -274,6 +312,10 @@ export function MusicExchange() {
       setDropState("success");
       setDropMessage("Pinned. I owe this one a listen.");
       setNote("");
+      setQuery("");
+      setResults([]);
+      setSearchState("idle");
+      setSearchMessage("Waiting for a track");
       void loadPins().then(() => {
         const reducedMotion = window.matchMedia(
           "(prefers-reduced-motion: reduce)",
@@ -327,12 +369,12 @@ export function MusicExchange() {
             <h3 id="music-send-title">Leave a track on the board.</h3>
           </div>
 
-          <form className="music-search-form" onSubmit={searchTracks}>
+          <form className="music-search-form" onSubmit={submitSearch}>
             <Search size={17} aria-hidden="true" />
             <input
               type="search"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={updateQuery}
               placeholder="Song or artist"
               maxLength={80}
               aria-label="Search Spotify songs"
