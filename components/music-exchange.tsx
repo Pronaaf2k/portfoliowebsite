@@ -89,6 +89,7 @@ export function MusicExchange() {
   const [pinState, setPinState] = useState<RequestState>("loading");
   const pinRailRef = useRef<HTMLDivElement>(null);
   const activeSearchRef = useRef<AbortController | null>(null);
+  const hasDrawnGiftRef = useRef(false);
 
   const loadPins = async () => {
     try {
@@ -335,7 +336,7 @@ export function MusicExchange() {
     }
   };
 
-  const drawRandomTrack = async () => {
+  const drawRandomTrack = useCallback(async () => {
     setRandomState("loading");
     setRandomMessage("Shuffling my side of the exchange");
 
@@ -357,7 +358,17 @@ export function MusicExchange() {
         error instanceof Error ? error.message : "My playlists are not connected yet",
       );
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (hasDrawnGiftRef.current) return;
+      hasDrawnGiftRef.current = true;
+      void drawRandomTrack();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [drawRandomTrack]);
 
   return (
     <div className="music-exchange">
@@ -370,7 +381,9 @@ export function MusicExchange() {
         <section className="music-send-channel" aria-labelledby="music-send-title">
           <div className="music-channel-head">
             <span>01 / Pin a song</span>
-            <h3 id="music-send-title">Leave a track on the board.</h3>
+            <h3 id="music-send-title" className="music-section-phrase">
+              Leave me a song you always come back to.
+            </h3>
           </div>
 
           <form className="music-search-form" onSubmit={submitSearch}>
@@ -500,7 +513,9 @@ export function MusicExchange() {
           <div className="music-pinboard-head">
             <div>
               <span>02 / Public pinboard</span>
-              <h3 id="music-pinboard-title">Songs people left here.</h3>
+              <h3 id="music-pinboard-title" className="music-section-phrase">
+                Pieces of your worlds, left here with me.
+              </h3>
             </div>
 
           </div>
@@ -572,10 +587,12 @@ export function MusicExchange() {
           </div>
         </section>
 
-        <section className="music-take-channel" aria-labelledby="music-take-title">
+        <section className="music-take-channel" aria-label="Take a song">
           <div className="music-channel-head">
             <span>03 / Take</span>
-            <h3 id="music-take-title">Something from my side.</h3>
+            <p className="music-section-phrase">
+              A small piece of my world, left here just for you.
+            </p>
           </div>
 
           <div className={"music-gift-stage" + (gift ? " has-track" : "")}>
@@ -583,7 +600,6 @@ export function MusicExchange() {
               <>
                 <TrackArtwork track={gift} sizes="(max-width: 680px) 78vw, 360px" />
                 <div className="music-gift-copy">
-                  <span>Random pull</span>
                   <strong>{gift.name}</strong>
                   <p>{gift.artists}</p>
                   <a href={gift.spotifyUrl} target="_blank" rel="noreferrer">
@@ -595,28 +611,23 @@ export function MusicExchange() {
             ) : (
               <div className="music-gift-idle">
                 <Disc3 size={76} strokeWidth={0.8} aria-hidden="true" />
-                <span>One pull. No algorithmic explanation.</span>
+                <span aria-live="polite">
+                  {randomState === "error"
+                    ? randomMessage
+                    : "Finding something from my side."}
+                </span>
+                {randomState === "error" && (
+                  <button
+                    type="button"
+                    className="button button-primary music-gift-button"
+                    onClick={drawRandomTrack}
+                  >
+                    <Shuffle size={17} aria-hidden="true" />
+                    Try another song
+                  </button>
+                )}
               </div>
             )}
-          </div>
-
-          <div className="music-random-control">
-            <p className={"is-" + randomState} aria-live="polite">
-              {randomMessage}
-            </p>
-            <button
-              type="button"
-              className="button button-primary"
-              onClick={drawRandomTrack}
-              disabled={randomState === "loading"}
-            >
-              {randomState === "loading" ? (
-                <LoaderCircle className="is-spinning" size={17} aria-hidden="true" />
-              ) : (
-                <Shuffle size={17} aria-hidden="true" />
-              )}
-              {gift ? "Another one" : "Give me a song"}
-            </button>
           </div>
         </section>
       </div>
