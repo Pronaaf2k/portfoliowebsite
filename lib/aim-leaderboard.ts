@@ -14,9 +14,9 @@ import {
 
 export const AIM_DURATION_MS = 15_000;
 
-const SESSION_TTL_SECONDS = 125;
+const SESSION_TTL_SECONDS = 6 * 60;
 const MINIMUM_RUN_MS = AIM_DURATION_MS - 1_500;
-const MAXIMUM_RUN_MS = AIM_DURATION_MS + 45_000;
+const MAXIMUM_RUN_MS = AIM_DURATION_MS + 5 * 60_000;
 const MAX_HITS = 240;
 const MAX_MISSES = 1_000;
 const SESSION_LIMIT_PER_HOUR = 24;
@@ -28,7 +28,6 @@ const ARCHIVE_INDEX = "aim:archive:index";
 
 type SessionRecord = {
   id: string;
-  name: string;
   fingerprint: string;
   startedAt: number;
 };
@@ -63,7 +62,9 @@ export function isAimLeaderboardConfigured() {
 }
 
 export function sanitizePlayerName(input: unknown) {
-  if (typeof input !== "string") return "ANON";
+  if (typeof input !== "string") {
+    throw new AimGameError("Enter a name before publishing your score", 400);
+  }
 
   const value = input
     .normalize("NFKC")
@@ -72,7 +73,15 @@ export function sanitizePlayerName(input: unknown) {
     .trim()
     .slice(0, 16);
 
-  return value || "ANON";
+  if (!value) {
+    throw new AimGameError("Enter a name before publishing your score", 400);
+  }
+
+  if (/^anon(?:ymous)?$/i.test(value)) {
+    throw new AimGameError("Choose a real handle for the leaderboard", 400);
+  }
+
+  return value;
 }
 
 function requireConfiguration() {
@@ -147,6 +156,7 @@ function parseLeaderboard(raw: Array<string | number>) {
       if (
         !compact.i ||
         !compact.n ||
+        /^anon(?:ymous)?$/i.test(compact.n.trim()) ||
         !Number.isFinite(score) ||
         !Number.isFinite(compact.h)
       ) {
@@ -182,10 +192,7 @@ async function enforceSessionRateLimit(fingerprint: string) {
   }
 }
 
-export async function createAimSession(
-  request: Request,
-  requestedName: unknown,
-): Promise<AimSessionResponse> {
+export async function createAimSession(request: Request): Promise<AimSessionResponse> {
   requireConfiguration();
 
   const fingerprint = getClientFingerprint(request);
@@ -193,7 +200,6 @@ export async function createAimSession(
 
   const session: SessionRecord = {
     id: randomUUID(),
-    name: sanitizePlayerName(requestedName),
     fingerprint,
     startedAt: Date.now(),
   };
@@ -220,13 +226,14 @@ export async function createAimSession(
 
 export async function submitAimScore(
   request: Request,
-  input: { sessionId?: unknown; hits?: unknown; misses?: unknown },
+  input: { sessionId?: unknown; name?: unknown; hits?: unknown; misses?: unknown },
 ): Promise<AimScoreResponse> {
   requireConfiguration();
 
   const sessionId = typeof input.sessionId === "string" ? input.sessionId : "";
   const hits = Number(input.hits);
   const misses = Number(input.misses);
+  const playerName = sanitizePlayerName(input.name);
 
   if (!/^[0-9a-f-]{36}$/i.test(sessionId)) {
     throw new AimGameError("Invalid game session", 400);
@@ -276,7 +283,7 @@ export async function submitAimScore(
   const createdAt = new Date().toISOString();
   const compact: CompactEntry = {
     i: session.id,
-    n: session.name,
+    n: playerName,
     h: hits,
     m: misses,
     a: accuracy,

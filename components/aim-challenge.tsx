@@ -12,6 +12,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type FormEvent,
   type KeyboardEvent,
   type PointerEvent,
 } from "react";
@@ -24,7 +25,7 @@ import type {
 
 const GAME_DURATION_MS = 15_000;
 
-type GamePhase = "idle" | "arming" | "running" | "submitting" | "complete";
+type GamePhase = "idle" | "arming" | "running" | "naming" | "submitting" | "complete";
 type ConnectionMode = "checking" | "online" | "local";
 type TargetPosition = { x: number; y: number };
 
@@ -51,7 +52,8 @@ function formatTimer(milliseconds: number) {
 export function AimChallenge() {
   const [phase, setPhase] = useState<GamePhase>("idle");
   const [connection, setConnection] = useState<ConnectionMode>("checking");
-  const [name, setName] = useState("ANON");
+  const [name, setName] = useState("");
+  const [nameError, setNameError] = useState("");
   const [hits, setHits] = useState(0);
   const [misses, setMisses] = useState(0);
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION_MS);
@@ -69,6 +71,7 @@ export function AimChallenge() {
   const durationRef = useRef(GAME_DURATION_MS);
   const sessionIdRef = useRef<string | null>(null);
   const finishingRef = useRef(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const refreshLeaderboards = useCallback(async () => {
     try {
@@ -92,7 +95,9 @@ export function AimChallenge() {
     const startupTimer = window.setTimeout(() => {
       try {
         const savedName = window.localStorage.getItem("aim-player-name");
-        if (savedName) setName(savedName);
+        if (savedName && !/^anon(?:ymous)?$/i.test(savedName.trim())) {
+          setName(savedName);
+        }
       } catch {
         // Local storage is optional; the game still works without it.
       }
@@ -103,54 +108,25 @@ export function AimChallenge() {
     return () => window.clearTimeout(startupTimer);
   }, [refreshLeaderboards]);
 
+  useEffect(() => {
+    if (phase !== "naming") return;
+
+    nameInputRef.current?.focus();
+    nameInputRef.current?.select();
+  }, [phase]);
+
   const moveTarget = useCallback(() => {
     setTarget((previous) => nextTarget(previous));
   }, []);
 
-  const finishGame = useCallback(async () => {
+  const finishGame = useCallback(() => {
     if (finishingRef.current) return;
     finishingRef.current = true;
     setTimeLeft(0);
-    setPhase("submitting");
-
-    const finalHits = hitsRef.current;
-    const finalMisses = missesRef.current;
-    const sessionId = sessionIdRef.current;
-
-    if (!sessionId) {
-      setNotice("Local run complete. Connect Upstash to publish it.");
-      setPhase("complete");
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/aim/score", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, hits: finalHits, misses: finalMisses }),
-      });
-      const payload = (await response.json()) as
-        | AimScoreResponse
-        | { accepted: false; error?: string };
-
-      if (!response.ok || !payload.accepted) {
-        throw new Error("error" in payload ? payload.error : "Score was not accepted");
-      }
-
-      setLastSessionId(payload.sessionId);
-      const rank = payload.weeklyRank ? "Weekly rank #" + payload.weeklyRank + "." : "";
-      setNotice((rank + " Score saved to weekly and all-time boards.").trim());
-      await refreshLeaderboards();
-    } catch (error) {
-      setNotice(
-        error instanceof Error && error.message
-          ? error.message
-          : "Run complete, but the score could not be saved.",
-      );
-    } finally {
-      setPhase("complete");
-    }
-  }, [refreshLeaderboards]);
+    setNameError("");
+    setNotice("Run complete. Add your name to claim the score.");
+    setPhase("naming");
+  }, []);
 
   useEffect(() => {
     if (phase !== "running") return;
@@ -167,14 +143,13 @@ export function AimChallenge() {
   }, [finishGame, phase]);
 
   const startGame = async () => {
-    if (phase === "arming" || phase === "running" || phase === "submitting") return;
-
-    const playerName = name.trim().slice(0, 16) || "ANON";
-    setName(playerName);
-    try {
-      window.localStorage.setItem("aim-player-name", playerName);
-    } catch {
-      // A blocked storage API should never block the game.
+    if (
+      phase === "arming" ||
+      phase === "running" ||
+      phase === "naming" ||
+      phase === "submitting"
+    ) {
+      return;
     }
 
     setPhase("arming");
@@ -186,8 +161,6 @@ export function AimChallenge() {
     try {
       const response = await fetch("/api/aim/session", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: playerName }),
       });
       const payload = (await response.json()) as
         | AimSessionResponse
@@ -215,6 +188,74 @@ export function AimChallenge() {
     moveTarget();
     deadlineRef.current = performance.now() + durationRef.current;
     setPhase("running");
+  };
+
+  const submitScore = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (phase !== "naming") return;
+
+    const playerName = name.trim().slice(0, 16);
+    if (!playerName) {
+      setNameError("A name is required to publish this score.");
+      nameInputRef.current?.focus();
+      return;
+    }
+    if (/^anon(?:ymous)?$/i.test(playerName)) {
+      setNameError("Choose a real handle for the leaderboard.");
+      nameInputRef.current?.focus();
+      return;
+    }
+
+    setName(playerName);
+    setNameError("");
+    try {
+      window.localStorage.setItem("aim-player-name", playerName);
+    } catch {
+      // A blocked storage API should never block the game.
+    }
+
+    const sessionId = sessionIdRef.current;
+    if (!sessionId) {
+      setNotice("Result kept locally. The online board is unavailable right now.");
+      setPhase("complete");
+      return;
+    }
+
+    setPhase("submitting");
+    setNotice("Publishing your verified run...");
+
+    try {
+      const response = await fetch("/api/aim/score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          name: playerName,
+          hits: hitsRef.current,
+          misses: missesRef.current,
+        }),
+      });
+      const payload = (await response.json()) as
+        | AimScoreResponse
+        | { accepted: false; error?: string };
+
+      if (!response.ok || !payload.accepted) {
+        throw new Error("error" in payload ? payload.error : "Score was not accepted");
+      }
+
+      setLastSessionId(payload.sessionId);
+      const rank = payload.weeklyRank ? "Weekly rank #" + payload.weeklyRank + "." : "";
+      setNotice((rank + " Score saved to weekly and all-time boards.").trim());
+      await refreshLeaderboards();
+      setPhase("complete");
+    } catch (error) {
+      setNameError(
+        error instanceof Error && error.message
+          ? error.message
+          : "The score could not be published. Try again.",
+      );
+      setPhase("naming");
+    }
   };
 
   const registerHit = () => {
@@ -246,7 +287,12 @@ export function AimChallenge() {
   const attempts = hits + misses;
   const accuracy = attempts ? Math.round((hits / attempts) * 1_000) / 10 : 100;
   const leaderboard = leaderboards[period];
-  const phaseLabel = phase === "complete" ? "COMPLETE" : phase.toUpperCase();
+  const phaseLabel =
+    phase === "naming"
+      ? "NAME REQUIRED"
+      : phase === "complete"
+        ? "COMPLETE"
+        : phase.toUpperCase();
 
   return (
     <section className="aim-challenge" aria-labelledby="aim-challenge-title">
@@ -267,17 +313,10 @@ export function AimChallenge() {
       <div className="aim-game-layout">
         <div className="aim-stage">
           <div className="aim-player-row">
-            <label>
-              <span>Handle</span>
-              <input
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                maxLength={16}
-                disabled={phase === "arming" || phase === "running" || phase === "submitting"}
-                autoComplete="nickname"
-                aria-label="Leaderboard handle"
-              />
-            </label>
+            <span className="aim-run-note">
+              <Crosshair size={14} aria-hidden="true" />
+              Name comes after the run
+            </span>
             <span className={"aim-connection is-" + connection}>
               {connection === "online" ? <Wifi size={14} /> : <WifiOff size={14} />}
               {connection === "checking"
@@ -325,7 +364,41 @@ export function AimChallenge() {
             {phase !== "running" && (
               <div className="aim-board-state">
                 <Crosshair size={30} strokeWidth={1.4} aria-hidden="true" />
-                {phase === "complete" ? (
+                {phase === "naming" ? (
+                  <>
+                    <strong>{hits} clean hits</strong>
+                    <p>{accuracy.toFixed(1)}% accuracy. Add your name to publish the run.</p>
+                    <form className="aim-score-submit" onSubmit={submitScore} noValidate>
+                      <label htmlFor="aim-player-name">Name for the leaderboard</label>
+                      <div>
+                        <input
+                          ref={nameInputRef}
+                          id="aim-player-name"
+                          value={name}
+                          onChange={(event) => {
+                            setName(event.target.value);
+                            if (nameError) setNameError("");
+                          }}
+                          maxLength={16}
+                          autoComplete="nickname"
+                          placeholder="Your handle"
+                          aria-describedby={nameError ? "aim-name-error" : undefined}
+                          aria-invalid={Boolean(nameError)}
+                          required
+                        />
+                        <button
+                          type="submit"
+                          className="button button-primary"
+                          disabled={!name.trim()}
+                        >
+                          <Trophy size={16} aria-hidden="true" />
+                          Publish score
+                        </button>
+                      </div>
+                      {nameError && <span id="aim-name-error">{nameError}</span>}
+                    </form>
+                  </>
+                ) : phase === "complete" ? (
                   <>
                     <strong>{hits} clean hits</strong>
                     <p>{notice}</p>

@@ -11,6 +11,7 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
       sessionId?: unknown;
+      name?: unknown;
       hits?: unknown;
       misses?: unknown;
     };

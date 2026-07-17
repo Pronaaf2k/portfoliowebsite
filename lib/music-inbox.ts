@@ -17,6 +17,7 @@ import {
   redisCommand,
   redisTransaction,
 } from "@/lib/upstash-rest";
+import { containsProfanity } from "@/lib/profanity";
 
 const NOTE_MAX_LENGTH = 500;
 const SENDER_MAX_LENGTH = 80;
@@ -114,6 +115,13 @@ function normalizeNote(value: unknown) {
     throw new MusicInboxError("Note contains unsupported characters", 400);
   }
 
+  if (containsProfanity(note)) {
+    throw new MusicInboxError(
+      "Keep it clean: public notes cannot include profanity",
+      400,
+    );
+  }
+
   return note;
 }
 
@@ -133,6 +141,13 @@ function normalizeSender(value: unknown) {
   ) {
     throw new MusicInboxError(
       "Sender name is limited to " + SENDER_MAX_LENGTH + " characters",
+      400,
+    );
+  }
+
+  if (containsProfanity(sender)) {
+    throw new MusicInboxError(
+      "Keep it clean: public names cannot include profanity",
       400,
     );
   }
@@ -336,7 +351,14 @@ function toPublicPin(value: unknown): MusicPin | null {
   const sender = typeof value.sender === "string" ? value.sender.trim() : "";
   const track = toPublicTrack(value.track);
 
-  if (!id || !Number.isFinite(Date.parse(createdAt)) || !note || !track) {
+  if (
+    !id ||
+    !Number.isFinite(Date.parse(createdAt)) ||
+    !note ||
+    !track ||
+    containsProfanity(note) ||
+    containsProfanity(sender)
+  ) {
     return null;
   }
 

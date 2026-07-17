@@ -117,6 +117,95 @@ export function MusicExchange() {
   }, []);
 
 
+  useEffect(() => {
+    const rail = pinRailRef.current;
+    if (!rail) return;
+
+    const desktopPointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    let activePointer: number | null = null;
+    let dragStartX = 0;
+    let dragStartScroll = 0;
+    let dragged = false;
+
+    const onWheel = (event: WheelEvent) => {
+      if (!desktopPointer.matches || rail.scrollWidth <= rail.clientWidth) return;
+
+      const delta =
+        Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      if (!delta) return;
+
+      const atStart = rail.scrollLeft <= 0 && delta < 0;
+      const atEnd =
+        rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 1 && delta > 0;
+      if (atStart || atEnd) return;
+
+      event.preventDefault();
+      rail.scrollLeft += delta;
+    };
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (
+        !desktopPointer.matches ||
+        event.button !== 0 ||
+        rail.scrollWidth <= rail.clientWidth
+      ) {
+        return;
+      }
+
+      activePointer = event.pointerId;
+      dragStartX = event.clientX;
+      dragStartScroll = rail.scrollLeft;
+      dragged = false;
+      rail.setPointerCapture(event.pointerId);
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (event.pointerId !== activePointer) return;
+
+      const movement = event.clientX - dragStartX;
+      if (Math.abs(movement) < 4 && !dragged) return;
+
+      dragged = true;
+      event.preventDefault();
+      rail.classList.add("is-dragging");
+      rail.scrollLeft = dragStartScroll - movement;
+    };
+
+    const finishDrag = (event: PointerEvent) => {
+      if (event.pointerId !== activePointer) return;
+      if (rail.hasPointerCapture(event.pointerId)) {
+        rail.releasePointerCapture(event.pointerId);
+      }
+      activePointer = null;
+      rail.classList.remove("is-dragging");
+      window.setTimeout(() => {
+        dragged = false;
+      }, 0);
+    };
+
+    const preventDraggedClick = (event: MouseEvent) => {
+      if (!dragged) return;
+      event.preventDefault();
+      event.stopPropagation();
+      dragged = false;
+    };
+
+    rail.addEventListener("wheel", onWheel, { passive: false });
+    rail.addEventListener("pointerdown", onPointerDown);
+    rail.addEventListener("pointermove", onPointerMove);
+    rail.addEventListener("pointerup", finishDrag);
+    rail.addEventListener("pointercancel", finishDrag);
+    rail.addEventListener("click", preventDraggedClick, true);
+
+    return () => {
+      rail.removeEventListener("wheel", onWheel);
+      rail.removeEventListener("pointerdown", onPointerDown);
+      rail.removeEventListener("pointermove", onPointerMove);
+      rail.removeEventListener("pointerup", finishDrag);
+      rail.removeEventListener("pointercancel", finishDrag);
+      rail.removeEventListener("click", preventDraggedClick, true);
+    };
+  }, []);
   const searchTracks = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const value = query.trim();
@@ -377,34 +466,51 @@ export function MusicExchange() {
             aria-label="Recently pinned songs"
           >
             {pinState === "loading" ? (
-              Array.from({ length: 3 }, (_, index) => (
-                <div className="music-pin-placeholder" key={index} aria-hidden="true" />
-              ))
+              <div className="music-pin-page is-loading" aria-hidden="true">
+                {Array.from({ length: 6 }, (_, index) => (
+                  <div className="music-pin-placeholder" key={index} />
+                ))}
+              </div>
             ) : pins.length ? (
-              pins.map((pin) => (
-                <article className="music-pin-card" key={pin.id}>
-                  <div className="music-pin-track">
-                    <TrackArtwork track={pin.track} sizes="64px" />
-                    <div>
-                      <span>Pinned by {pin.sender}</span>
-                      <strong>{pin.track.name}</strong>
-                      <small>{pin.track.artists}</small>
-                    </div>
-                  </div>
-                  <blockquote>{pin.note}</blockquote>
-                  <div className="music-pin-foot">
-                    <time dateTime={pin.createdAt}>{formatPinDate(pin.createdAt)}</time>
+              Array.from({ length: Math.ceil(pins.length / 6) }, (_, pageIndex) => (
+                <div
+                  className="music-pin-page"
+                  key={pins[pageIndex * 6]?.id ?? pageIndex}
+                  role="group"
+                  aria-label={
+                    "Pinned songs " +
+                    (pageIndex * 6 + 1) +
+                    " to " +
+                    Math.min((pageIndex + 1) * 6, pins.length)
+                  }
+                >
+                  {pins.slice(pageIndex * 6, (pageIndex + 1) * 6).map((pin) => (
                     <a
+                      className="music-pin-card"
+                      key={pin.id}
                       href={pin.track.spotifyUrl}
                       target="_blank"
                       rel="noreferrer"
-                      aria-label={"Open " + pin.track.name + " on Spotify"}
-                      title="Open on Spotify"
+                      aria-label={
+                        "Listen to " + pin.track.name + " by " + pin.track.artists + " on Spotify"
+                      }
                     >
-                      <ExternalLink size={15} aria-hidden="true" />
+                      <div className="music-pin-track">
+                        <TrackArtwork track={pin.track} sizes="64px" />
+                        <div>
+                          <strong>{pin.track.name}</strong>
+                          <small>{pin.track.artists}</small>
+                        </div>
+                      </div>
+                      <blockquote>
+                        {pin.note} <cite>~ {pin.sender}</cite>
+                      </blockquote>
+                      <time className="music-pin-date" dateTime={pin.createdAt}>
+                        {formatPinDate(pin.createdAt)}
+                      </time>
                     </a>
-                  </div>
-                </article>
+                  ))}
+                </div>
               ))
             ) : (
               <div className="music-pin-empty">

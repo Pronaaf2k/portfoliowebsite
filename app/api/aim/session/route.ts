@@ -9,8 +9,7 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { name?: unknown };
-    const session = await createAimSession(request, body.name);
+    const session = await createAimSession(request);
 
     return NextResponse.json(session, {
       headers: { "Cache-Control": "no-store, max-age=0" },
