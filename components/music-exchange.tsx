@@ -279,6 +279,10 @@ export function MusicExchange() {
 
   const chooseTrack = (track: MusicTrack) => {
     setSelected(track);
+    setQuery("");
+    setResults([]);
+    setSearchState("idle");
+    setSearchMessage("Waiting for a track");
     setDropState("idle");
     setDropMessage("");
   };
