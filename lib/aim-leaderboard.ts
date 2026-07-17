@@ -146,8 +146,9 @@ function getPeriodDescriptors(now = new Date()) {
   return descriptorsForShiftedDate(new Date(now.getTime() + DHAKA_OFFSET_MS));
 }
 
-function parseLeaderboard(raw: Array<string | number>) {
+function parseLeaderboard(raw: Array<string | number>, limit = 10) {
   const entries: AimLeaderboardEntry[] = [];
+  const seenNames = new Set<string>();
 
   for (let index = 0; index < raw.length; index += 2) {
     try {
@@ -163,6 +164,10 @@ function parseLeaderboard(raw: Array<string | number>) {
         continue;
       }
 
+      const normalizedName = compact.n.trim().toLocaleLowerCase();
+      if (seenNames.has(normalizedName)) continue;
+      seenNames.add(normalizedName);
+
       entries.push({
         id: compact.i,
         name: compact.n,
@@ -171,6 +176,7 @@ function parseLeaderboard(raw: Array<string | number>) {
         accuracy: compact.a,
         createdAt: compact.t,
       });
+      if (entries.length >= limit) break;
     } catch {
       continue;
     }
@@ -345,7 +351,7 @@ export async function getAimLeaderboard(
     "ZREVRANGE",
     descriptor.key,
     0,
-    Math.max(0, limit - 1),
+    Math.max(0, Math.max(limit, 100) - 1),
     "WITHSCORES",
   ]);
 
@@ -353,7 +359,7 @@ export async function getAimLeaderboard(
     configured: true,
     period,
     label: descriptor.label,
-    entries: parseLeaderboard(raw),
+    entries: parseLeaderboard(raw, limit),
   };
 }
 

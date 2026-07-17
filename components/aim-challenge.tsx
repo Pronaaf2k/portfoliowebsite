@@ -287,6 +287,7 @@ export function AimChallenge() {
   const attempts = hits + misses;
   const accuracy = attempts ? Math.round((hits / attempts) * 1_000) / 10 : 100;
   const leaderboard = leaderboards[period];
+  const displayName = name.trim() || "No handle saved";
   const phaseLabel =
     phase === "naming"
       ? "NAME REQUIRED"
@@ -315,7 +316,7 @@ export function AimChallenge() {
           <div className="aim-player-row">
             <span className="aim-run-note">
               <Crosshair size={14} aria-hidden="true" />
-              Name comes after the run
+              Playing as {displayName}
             </span>
             <span className={"aim-connection is-" + connection}>
               {connection === "online" ? <Wifi size={14} /> : <WifiOff size={14} />}
@@ -459,7 +460,8 @@ export function AimChallenge() {
                 <span>Accuracy</span>
                 <span>Hits</span>
               </div>
-              <ol className="aim-score-list">
+              <div className="aim-score-scroll">
+                <ol className="aim-score-list">
                 {leaderboard.entries.map((entry, index) => (
                   <li
                     key={entry.id}
@@ -471,7 +473,8 @@ export function AimChallenge() {
                     <b>{entry.hits}</b>
                   </li>
                 ))}
-              </ol>
+                </ol>
+              </div>
             </>
           ) : (
             <div className="aim-score-empty">
