@@ -50,25 +50,55 @@ export function LiveSignal() {
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
+    let signalTimer: number | undefined;
+    let reading = false;
+    let stopped = false;
+
+    const scheduleNextRead = (delayMs: number) => {
+      window.clearTimeout(signalTimer);
+      signalTimer = window.setTimeout(
+        readSignal,
+        Math.min(Math.max(delayMs, 5_000), 30 * 60_000),
+      );
+    };
+
     const readSignal = async () => {
+      if (reading || stopped) return;
+      reading = true;
+      window.clearTimeout(signalTimer);
+
+      let nextReadMs = 60_000;
       try {
         const response = await fetch("/api/live", { cache: "no-store" });
         if (!response.ok) return;
-        setPayload((await response.json()) as LivePayload);
+        const nextPayload = (await response.json()) as LivePayload;
+        setPayload(nextPayload);
+        nextReadMs = nextPayload.spotify.refreshAfterMs ?? nextReadMs;
       } catch {
         // The snapshots stay useful when a provider is unavailable.
+      } finally {
+        reading = false;
+        if (!stopped) scheduleNextRead(nextReadMs);
       }
+    };
+
+    const readWhenVisible = () => {
+      if (document.visibilityState === "visible") readSignal();
     };
 
     readSignal();
     const clockStartTimer = window.setTimeout(() => setNow(new Date()), 0);
-    const signalTimer = window.setInterval(readSignal, 60_000);
     const clockTimer = window.setInterval(() => setNow(new Date()), 1_000);
+    window.addEventListener("focus", readSignal);
+    document.addEventListener("visibilitychange", readWhenVisible);
 
     return () => {
+      stopped = true;
       window.clearTimeout(clockStartTimer);
-      window.clearInterval(signalTimer);
+      window.clearTimeout(signalTimer);
       window.clearInterval(clockTimer);
+      window.removeEventListener("focus", readSignal);
+      document.removeEventListener("visibilitychange", readWhenVisible);
     };
   }, []);
 

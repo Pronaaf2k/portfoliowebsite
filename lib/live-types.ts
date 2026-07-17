@@ -22,5 +22,6 @@ export type LivePayload = {
     detail: string;
     meta: string;
     href: string;
+    refreshAfterMs?: number;
   };
 };

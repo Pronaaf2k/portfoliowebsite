@@ -348,12 +348,19 @@ export async function searchSpotifyTracks(query: string, limit = 8) {
     type: "track",
     limit: String(safeLimit),
   });
+  const tokenKind: TokenKind = process.env.SPOTIFY_REFRESH_TOKEN?.trim()
+    ? "user"
+    : "application";
   const response = await spotifyFetch(
     "/search?" + parameters.toString(),
-    "application",
+    tokenKind,
   );
 
   if (!response.ok) {
+    console.error("Spotify search request failed", {
+      status: response.status,
+      tokenKind,
+    });
     throwForSpotifyResponse(response, "Spotify search is unavailable");
   }
 

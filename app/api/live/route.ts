@@ -201,6 +201,7 @@ async function getSpotify(): Promise<LivePayload["spotify"]> {
         detail: "Spotify is connected",
         meta: "Nothing playing right now",
         href: "https://open.spotify.com/",
+        refreshAfterMs: 30_000,
       };
     }
 
@@ -208,8 +209,10 @@ async function getSpotify(): Promise<LivePayload["spotify"]> {
 
     const playing = (await playingResponse.json()) as {
       is_playing?: boolean;
+      progress_ms?: number;
       item?: {
         name?: string;
+        duration_ms?: number;
         external_urls?: { spotify?: string };
         artists?: Array<{ name?: string }>;
       };
@@ -218,12 +221,22 @@ async function getSpotify(): Promise<LivePayload["spotify"]> {
 
     if (!track) return spotifyFallback;
 
+    const remainingMs =
+      typeof track.duration_ms === "number" &&
+      typeof playing.progress_ms === "number"
+        ? track.duration_ms - playing.progress_ms
+        : null;
+
     return {
       state: playing.is_playing ? "live" : "snapshot",
       title: track.name ?? "Now playing",
       detail: track.artists?.map((artist) => artist.name).filter(Boolean).join(", ") ?? "Spotify",
       meta: playing.is_playing ? "Playing now" : "Recently paused",
       href: track.external_urls?.spotify ?? "https://open.spotify.com/",
+      refreshAfterMs:
+        playing.is_playing && remainingMs && remainingMs > 0
+          ? Math.max(5_000, remainingMs + 2_000)
+          : 30_000,
     };
   } catch {
     return spotifyFallback;
