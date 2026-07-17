@@ -418,7 +418,6 @@ export function AimChallenge() {
                     <strong>15 seconds. No warm-up.</strong>
                     <p>{notice}</p>
                     <button type="button" className="button button-primary" onClick={startGame}>
-                      <Crosshair size={16} aria-hidden="true" />
                       Start run
                     </button>
                   </>
