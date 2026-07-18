@@ -513,3 +513,25 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 
 
 .cable-complete .button svg{position:static;inset:auto;width:17px;height:17px;flex:0 0 17px;overflow:visible}
+
+
+/* 404 responsive composition */
+.not-found>.not-found-shell{width:min(100%,1240px);grid-template-columns:minmax(400px,.8fr) minmax(560px,1.2fr);gap:clamp(52px,5vw,72px)}
+.not-found-copy{min-width:0}
+.not-found .not-found-copy h1{max-width:100%;font-size:clamp(70px,7.5vw,102px)}
+.not-found .not-found-copy>p:not(.eyebrow){font-size:clamp(14px,1.05vw,16px);line-height:1.65}
+
+@media(max-width:1050px){
+  .not-found{place-items:start center;padding-block:34px}
+  .not-found>.not-found-shell{width:min(100%,720px);grid-template-columns:1fr;gap:44px}
+  .not-found-copy{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:0 28px}
+  .not-found-copy .eyebrow,.not-found-copy h1{grid-column:1/-1}
+  .not-found .not-found-copy h1{font-size:clamp(68px,10vw,92px)}
+  .not-found .not-found-copy>p:not(.eyebrow){margin-bottom:0}
+}
+@media(max-width:620px){
+  .not-found>.not-found-shell{gap:34px}
+  .not-found-copy{display:block}
+  .not-found .not-found-copy h1{font-size:clamp(58px,17vw,78px)}
+  .not-found .not-found-copy>p:not(.eyebrow){margin:24px 0 0}
+}
