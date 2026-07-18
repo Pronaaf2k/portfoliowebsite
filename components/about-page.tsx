@@ -11,7 +11,6 @@ import {
   Gamepad2,
   Headphones,
   Mail,
-  MousePointer2,
   Presentation,
   SlidersHorizontal,
   Sparkles,
@@ -245,9 +244,7 @@ export function AboutPage() {
               sizes="(max-width: 900px) 100vw, 46vw"
             />
             <div className={styles.portraitWash} aria-hidden="true" />
-            <div className={styles.cursorSignal} aria-hidden="true">
-              <MousePointer2 />
-            </div>
+            <div className={styles.cursorSignal} aria-hidden="true" />
             <div className={styles.portraitReadout}>
               <span>SUBJECT / SAMIYEEL</span>
               <strong>BUILDER</strong>
