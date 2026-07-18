@@ -452,7 +452,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 .cable-progress span{margin-top:8px;color:var(--fog);font-family:var(--mono);font-size:7px;text-transform:uppercase}
 .cable-board{position:relative;aspect-ratio:1.55;overflow:hidden;background:#0b0e11}
 .cable-board:before{position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:100% 24%;content:"";pointer-events:none}
-.cable-board svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.cable-board>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .cable-board path{fill:none;stroke:currentColor;vector-effect:non-scaling-stroke}
 .cable-stub{stroke-width:9;opacity:.9}
 .cable-line{stroke-width:9;filter:drop-shadow(0 0 5px currentColor);animation:cable-connect .34s cubic-bezier(.2,.72,.2,1) both}
@@ -485,3 +485,31 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   .cable-complete-actions{width:100%;justify-content:space-between}
 }
 @media(prefers-reduced-motion:reduce){.cable-line,.cable-complete{animation:none}}
+
+
+/* Cable drag interaction and label contrast */
+.cable-board>svg{pointer-events:none}
+.cable-terminal span{display:block!important;border:1px solid #3b454c;background:rgba(9,11,13,.94);padding:4px 7px;color:var(--paper);font-size:9px;font-weight:700;line-height:1;text-shadow:0 1px 2px var(--ink)}
+.cable-terminal.is-source{touch-action:none;user-select:none}
+.cable-terminal.is-dragging{z-index:4;cursor:grabbing}
+.cable-line.is-dragging{opacity:.85;filter:drop-shadow(0 0 7px currentColor);animation:none;stroke-dasharray:7 5}
+.cable-terminal.is-drop-target i{background:color-mix(in srgb,var(--cable-color) 32%,#0b0e11);box-shadow:0 0 0 3px var(--cable-color),0 0 0 10px color-mix(in srgb,var(--cable-color) 20%,transparent);animation:cable-target-pulse .8s ease-in-out infinite}
+@keyframes cable-target-pulse{50%{transform:scale(1.12)}}
+@media(max-width:560px){
+  .cable-terminal{gap:6px}
+  .cable-terminal span{display:block!important;padding:3px 5px;font-size:7px}
+  .cable-terminal.is-source span{right:calc(100% + 6px)}
+}
+@media(prefers-reduced-motion:reduce){.cable-terminal.is-drop-target i{animation:none}}
+
+
+/* Cable labels sit above their terminals and retain the channel color. */
+.cable-terminal span{display:block!important;border:0;background:transparent;padding:0;color:var(--cable-color);font-size:9px;font-weight:700;line-height:1;text-shadow:0 1px 3px var(--ink)}
+.cable-terminal.is-source span,.cable-terminal.is-socket span{position:absolute;top:auto;right:auto;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%)}
+@media(max-width:560px){.cable-terminal span{font-size:8px}.cable-terminal.is-source span{right:auto}}
+
+
+.cable-complete .button{min-height:40px;margin-top:15px;padding:8px 14px;font-family:var(--mono);font-size:8px;text-transform:uppercase}
+
+
+.cable-complete .button svg{position:static;inset:auto;width:17px;height:17px;flex:0 0 17px;overflow:visible}
