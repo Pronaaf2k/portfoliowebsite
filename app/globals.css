@@ -444,3 +444,44 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 @media(prefers-reduced-motion:reduce){
   .error-cell.is-exit:before,.error-cell.is-packet:after{animation:none}
 }
+
+
+/* 404 cable repair */
+.cable-progress{display:flex;align-items:flex-end;flex-direction:column}
+.cable-progress strong{font-family:var(--display);font-size:28px;line-height:.8}
+.cable-progress span{margin-top:8px;color:var(--fog);font-family:var(--mono);font-size:7px;text-transform:uppercase}
+.cable-board{position:relative;aspect-ratio:1.55;overflow:hidden;background:#0b0e11}
+.cable-board:before{position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:100% 24%;content:"";pointer-events:none}
+.cable-board svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.cable-board path{fill:none;stroke:currentColor;vector-effect:non-scaling-stroke}
+.cable-stub{stroke-width:9;opacity:.9}
+.cable-line{stroke-width:9;filter:drop-shadow(0 0 5px currentColor);animation:cable-connect .34s cubic-bezier(.2,.72,.2,1) both}
+.cable-terminal{--cable-color:var(--cyan);position:absolute;z-index:2;display:flex;align-items:center;gap:10px;border:0;background:transparent;color:var(--cable-color);cursor:pointer;font-family:var(--mono);font-size:8px;text-transform:uppercase;transform:translateY(-50%)}
+.cable-terminal i{display:block;width:27px;height:27px;flex:0 0 27px;border:7px solid #323b42;border-radius:50%;background:#0b0e11;box-shadow:0 0 0 2px var(--cable-color);transition:background-color .18s,box-shadow .18s,transform .18s}
+.cable-terminal:hover i,.cable-terminal:focus-visible i,.cable-terminal.is-selected i{background:var(--cable-color);box-shadow:0 0 0 2px var(--cable-color),0 0 0 7px color-mix(in srgb,var(--cable-color) 18%,transparent);transform:scale(1.08)}
+.cable-terminal.is-connected{pointer-events:none}
+.cable-terminal.is-connected i{border-color:var(--cable-color);background:var(--cable-color)}
+.cable-terminal.is-source{left:calc(18% - 14px)}
+.cable-terminal.is-source span{position:absolute;right:calc(100% + 10px)}
+.cable-terminal.is-socket{right:calc(18% - 14px)}
+.cable-complete{position:absolute;z-index:5;top:50%;left:50%;display:flex;width:max-content;max-width:calc(100% - 40px);align-items:center;flex-direction:column;border:1px solid var(--green);background:rgba(9,11,13,.94);padding:18px 28px;text-align:center;transform:translate(-50%,-50%);animation:cable-complete-in .32s ease-out both}
+.cable-complete strong{color:var(--green);font-family:var(--display);font-size:20px;text-transform:uppercase}
+.cable-complete span{margin-top:5px;color:var(--fog);font-family:var(--mono);font-size:8px;text-transform:uppercase}
+.cable-game-foot{display:flex;min-height:76px;align-items:center;justify-content:space-between;gap:22px;border-top:1px solid var(--line);padding:12px 14px}
+.not-found .cable-game-foot>p{max-width:280px;margin:0;color:var(--fog);font-family:var(--mono);font-size:8px;line-height:1.5;text-transform:uppercase}
+.cable-complete-actions{display:flex;align-items:center;gap:8px}
+.cable-complete-actions .button{min-height:40px;padding:8px 12px;font-family:var(--mono);font-size:8px;text-transform:uppercase}
+.error-reset:disabled{cursor:not-allowed;opacity:.35}
+@keyframes cable-connect{from{stroke-dasharray:1 200;opacity:.35}to{stroke-dasharray:200 0;opacity:1}}
+@keyframes cable-complete-in{from{opacity:0;transform:translate(-50%,-50%) scale(.88)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@media(max-width:560px){
+  .cable-board{aspect-ratio:1.15}
+  .cable-terminal span{display:none}
+  .cable-terminal.is-source{left:calc(18% - 13px)}
+  .cable-terminal.is-socket{right:calc(18% - 13px)}
+  .cable-terminal i{width:26px;height:26px;flex-basis:26px}
+  .cable-game-foot{align-items:flex-start;flex-direction:column}
+  .not-found .cable-game-foot>p{max-width:none}
+  .cable-complete-actions{width:100%;justify-content:space-between}
+}
+@media(prefers-reduced-motion:reduce){.cable-line,.cable-complete{animation:none}}

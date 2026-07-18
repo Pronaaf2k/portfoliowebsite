@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { ErrorSignalGame } from "@/components/error-signal-game";
 
 export default function NotFound() {
@@ -14,13 +12,9 @@ export default function NotFound() {
             lobby.
           </h1>
           <p>
-            The page you followed is not in this build. Find another route or
-            head home.
+            The page you followed is not in this build. Repair the panel to
+            unlock the route home.
           </p>
-          <Link className="button button-primary" href="/">
-            <ArrowLeft size={17} aria-hidden="true" />
-            Back home
-          </Link>
         </div>
         <ErrorSignalGame />
       </div>
