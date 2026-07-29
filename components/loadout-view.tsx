@@ -5,9 +5,20 @@ import {
   ArrowLeft,
   ArrowUpRight,
   Blocks,
+  Box,
+  CircuitBoard,
   Cpu,
+  Crosshair,
   Gamepad2,
+  Gauge,
+  HardDrive,
+  Headphones,
   Keyboard,
+  MemoryStick,
+  Mouse,
+  SquareDashed,
+  Trophy,
+  Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -34,37 +45,58 @@ const tabs: Array<{
     key: "tools",
     label: "Tools",
     icon: Blocks,
-    title: "The software that leaves fingerprints.",
-    intro:
-      "Grouped by the job it does, because a wall of technology badges never explained how anyone actually builds.",
+    title: "Software toolkit.",
+    intro: "Grouped by what it does.",
   },
   {
     key: "rig",
     label: "Rig",
     icon: Cpu,
-    title: "Built for work, frame time, and experiments.",
-    intro:
-      "A work-and-play machine with enough GPU and memory headroom for visual work, local models, and irresponsible multitasking.",
+    title: "Workstation.",
+    intro: "Work, local models, and play.",
   },
   {
     key: "desk",
     label: "Desk",
     icon: Keyboard,
-    title: "The physical interface.",
-    intro:
-      "Small, practical choices that make long sessions feel quieter and inputs feel more predictable.",
+    title: "Desk setup.",
+    intro: "The everyday input layer.",
   },
   {
     key: "play",
     label: "Play",
     icon: Gamepad2,
     title: "The competitive archive of Pronaaf2k.",
-    intro:
-      "Gaming stays off the main pitch, but the aliases, peak ranks, teams, and tournament runs are part of the person behind the work.",
+    intro: "Aliases, ranks, and tournament history.",
   },
 ];
 
-const meterWidths = ["74%", "58%", "66%", "50%"];
+const hardwareIcons: Partial<
+  Record<GroupKey, Record<string, typeof Blocks>>
+> = {
+  rig: {
+    CPU: Cpu,
+    GPU: CircuitBoard,
+    Memory: MemoryStick,
+    Storage: HardDrive,
+    Board: CircuitBoard,
+    Case: Box,
+  },
+  desk: {
+    Mouse,
+    "Main pad": SquareDashed,
+    "Desk pad": SquareDashed,
+    Keyboard,
+    Headphones,
+    "Sim rig": Gauge,
+  },
+  play: {
+    "Competitive alias": Gamepad2,
+    Championships: Trophy,
+    "Peak ranks": Crosshair,
+    "Tournament rosters": Users,
+  },
+};
 
 export function LoadoutView() {
   const [active, setActive] = useState<GroupKey>("tools");
@@ -105,8 +137,7 @@ export function LoadoutView() {
                 <span>Loadout</span>
               </h1>
               <p className="loadout-hero-copy">
-                The daily systems and off-hours archive of Samiyeel Alim Binaaf, also
-                known online and in competitive play as Pronaaf2k.
+                Daily hardware, software, and competitive setup.
               </p>
             </div>
 
@@ -188,28 +219,46 @@ export function LoadoutView() {
                 </div>
               </ScrollReveal>
 
-              <div className="loadout-item-list">
-                {loadoutGroups[active].map(([label, value, note], index) => (
-                  <ScrollReveal key={label} delay={index * 55}>
-                    <article className="loadout-item">
-                      <span className="loadout-item-index">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <div>
-                        <span>{label}</span>
-                        <h3>{value}</h3>
-                      </div>
-                      <p>{note}</p>
-                      {active === "play" ? (
-                        <div className="aim-meter" aria-hidden="true">
-                          <i style={{ width: meterWidths[index] }} />
+              <div
+                className={
+                  active !== "tools"
+                    ? `loadout-item-list loadout-hardware-grid${
+                        active === "play" ? " loadout-play-grid" : ""
+                      }`
+                    : "loadout-item-list"
+                }
+              >
+                {loadoutGroups[active].map(([label, value, note], index) => {
+                  const HardwareIcon = hardwareIcons[active]?.[label];
+
+                  return (
+                    <ScrollReveal key={label} delay={index * 55}>
+                      <article
+                        className={
+                          HardwareIcon
+                            ? "loadout-item loadout-hardware-card"
+                            : "loadout-item"
+                        }
+                      >
+                        {HardwareIcon ? (
+                          <div className="loadout-hardware-icon" aria-hidden="true">
+                            <HardwareIcon size={46} strokeWidth={1.35} />
+                          </div>
+                        ) : (
+                          <span className="loadout-item-index">
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
+                        )}
+                        <div>
+                          <span>{label}</span>
+                          <h3>{value}</h3>
                         </div>
-                      ) : (
-                        <span className="item-status">ACTIVE</span>
-                      )}
-                    </article>
-                  </ScrollReveal>
-                ))}
+                        {(active === "play" || !HardwareIcon) && <p>{note}</p>}
+                        {!HardwareIcon && <span className="item-status">ACTIVE</span>}
+                      </article>
+                    </ScrollReveal>
+                  );
+                })}
               </div>
             </div>
 

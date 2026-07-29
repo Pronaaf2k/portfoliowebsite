@@ -414,6 +414,23 @@ export function PortfolioHome() {
           </div>
         </section>
 
+        <section className="skills-section section" id="skills" aria-labelledby="skills-title">
+          <div className="shell skills-heading">
+            <ScrollReveal>
+              <p className="eyebrow">Skill set / working toolkit</p>
+              <h2 id="skills-title">The tools move. The systems thinking stays.</h2>
+            </ScrollReveal>
+            <ScrollReveal delay={80}>
+              <p>
+                A practical stack for building interfaces, backends, data products, and
+                production integrations. Drag the carousel to explore the stack.
+              </p>
+            </ScrollReveal>
+          </div>
+
+          <SkillsCarousel />
+        </section>
+
         <section
           className="next-build section"
           id="music-exchange"
@@ -435,23 +452,6 @@ export function PortfolioHome() {
               <MusicExchange />
             </ScrollReveal>
           </div>
-        </section>
-
-        <section className="skills-section section" id="skills" aria-labelledby="skills-title">
-          <div className="shell skills-heading">
-            <ScrollReveal>
-              <p className="eyebrow">Skill set / working toolkit</p>
-              <h2 id="skills-title">The tools move. The systems thinking stays.</h2>
-            </ScrollReveal>
-            <ScrollReveal delay={80}>
-              <p>
-                A practical stack for building interfaces, backends, data products, and
-                production integrations. Drag the carousel to explore the stack.
-              </p>
-            </ScrollReveal>
-          </div>
-
-          <SkillsCarousel />
         </section>
       </main>
 
