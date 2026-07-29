@@ -15,11 +15,6 @@ const nextConfig: NextConfig = {
         hostname: "cdn.jsdelivr.net",
         pathname: "/gh/devicons/devicon@latest/icons/**",
       },
-      {
-        protocol: "https",
-        hostname: "cdn.simpleicons.org",
-        pathname: "/**",
-      },
     ],
   },
 };

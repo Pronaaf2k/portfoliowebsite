@@ -57,7 +57,7 @@ const skills = [
   { name: "Python", logo: "python/python-original.svg" },
   { name: "PyTorch", logo: "pytorch/pytorch-original.svg" },
   { name: "TensorFlow", logo: "tensorflow/tensorflow-original.svg" },
-  { name: "Stripe", logo: "https://cdn.simpleicons.org/stripe/635BFF" },
+  { name: "Stripe", logo: "/images/skills/stripe.svg" },
   { name: "Git", logo: "git/git-original.svg" },
   { name: "Vercel", logo: "vercel/vercel-original.svg", monochrome: true },
 ];
@@ -72,7 +72,7 @@ function SkillRail({ duplicate = false }: { duplicate?: boolean }) {
         >
           <Image
             src={
-              skill.logo.startsWith("https://")
+              skill.logo.startsWith("/")
                 ? skill.logo
                 : "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/" + skill.logo
             }
@@ -99,10 +99,19 @@ function SkillsCarousel() {
     const carousel = carouselRef.current;
     if (!carousel) return;
 
-    const frameId = requestAnimationFrame(() => {
-      carousel.scrollLeft = carousel.scrollWidth / 3;
-    });
-    return () => cancelAnimationFrame(frameId);
+    const segmentWidth = () => carousel.scrollWidth / 3;
+    carousel.scrollLeft = segmentWidth();
+
+    const intervalId = window.setInterval(() => {
+      const segment = segmentWidth();
+      if (!segment) return;
+
+      if (carousel.scrollLeft >= segment * 2) carousel.scrollLeft -= segment;
+      if (carousel.scrollLeft <= 0) carousel.scrollLeft += segment;
+      if (!isDraggingRef.current) carousel.scrollLeft += 1;
+    }, 24);
+
+    return () => window.clearInterval(intervalId);
   }, []);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -120,7 +129,13 @@ function SkillsCarousel() {
     const carousel = carouselRef.current;
     if (!carousel || !isDraggingRef.current) return;
 
-    carousel.scrollLeft = dragStartScrollRef.current - (event.clientX - dragStartXRef.current);
+    const segment = carousel.scrollWidth / 3;
+    let nextScroll = dragStartScrollRef.current - (event.clientX - dragStartXRef.current);
+
+    if (nextScroll >= segment * 2) nextScroll -= segment;
+    if (nextScroll <= 0) nextScroll += segment;
+
+    carousel.scrollLeft = nextScroll;
   };
 
   const endDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
