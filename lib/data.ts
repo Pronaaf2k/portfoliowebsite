@@ -305,15 +305,13 @@ export const experience = [
     period: "2022 — now",
     title: "Private tutor",
     place: "Cambridge O-Level / Pre O-Level",
-    detail:
-      "Teach mathematics and science one-on-one. The useful skill is turning a complicated idea into the next obvious step.",
+    detail: "Teach mathematics and science one-on-one.",
   },
   {
     period: "2022 — now",
     title: "CSE undergraduate",
     place: "North South University",
-    detail:
-      "Focused on AI/ML, accessible products, and full-stack systems that leave the notebook and meet real users.",
+    detail: "Studied AI/ML, secured systems, accessible products, and full-stack development.",
   },
 ];
 

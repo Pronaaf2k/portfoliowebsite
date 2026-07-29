@@ -2,20 +2,22 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import {
   ArrowDown,
-  ArrowRight,
   ArrowUpRight,
   ChevronDown,
   Code2,
   Gamepad2,
   Mail,
   Network,
-  Radio,
 } from "lucide-react";
-import { experience, profile, projects, proofPoints, type Project } from "@/lib/data";
-import { LiveSignal } from "@/components/live-signal";
+import { experience, profile, projects, type Project } from "@/lib/data";
 import { MusicExchange } from "@/components/music-exchange";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SignalScope } from "@/components/signal-scope";
@@ -44,6 +46,120 @@ function SectionHeading({
 
 const featuredProjects = projects.filter((project) => project.featured);
 const archivedProjects = projects.filter((project) => !project.featured);
+
+const skills = [
+  { name: "React", logo: "react/react-original.svg" },
+  { name: "Next.js", logo: "nextjs/nextjs-original.svg", monochrome: true },
+  { name: "TypeScript", logo: "typescript/typescript-original.svg" },
+  { name: "Node.js", logo: "nodejs/nodejs-original.svg" },
+  { name: "Express", logo: "express/express-original.svg", monochrome: true },
+  { name: "PostgreSQL", logo: "postgresql/postgresql-original.svg" },
+  { name: "Python", logo: "python/python-original.svg" },
+  { name: "PyTorch", logo: "pytorch/pytorch-original.svg" },
+  { name: "TensorFlow", logo: "tensorflow/tensorflow-original.svg" },
+  { name: "Stripe", logo: "https://cdn.simpleicons.org/stripe/635BFF" },
+  { name: "Git", logo: "git/git-original.svg" },
+  { name: "Vercel", logo: "vercel/vercel-original.svg", monochrome: true },
+];
+
+function SkillRail({ duplicate = false }: { duplicate?: boolean }) {
+  return (
+    <div className="skills-rail" aria-hidden={duplicate || undefined}>
+      {skills.map((skill) => (
+        <div
+          className={"skill-logo-item" + (skill.monochrome ? " is-monochrome" : "")}
+          key={skill.name}
+        >
+          <Image
+            src={
+              skill.logo.startsWith("https://")
+                ? skill.logo
+                : "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/" + skill.logo
+            }
+            alt=""
+            width={64}
+            height={64}
+            unoptimized
+          />
+          <span>{skill.name}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SkillsCarousel() {
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const dragStartScrollRef = useRef(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const frameId = requestAnimationFrame(() => {
+      carousel.scrollLeft = carousel.scrollWidth / 3;
+    });
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    isDraggingRef.current = true;
+    dragStartXRef.current = event.clientX;
+    dragStartScrollRef.current = carousel.scrollLeft;
+    setIsDragging(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const carousel = carouselRef.current;
+    if (!carousel || !isDraggingRef.current) return;
+
+    carousel.scrollLeft = dragStartScrollRef.current - (event.clientX - dragStartXRef.current);
+  };
+
+  const endDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  return (
+    <div
+      ref={carouselRef}
+      className={"skills-marquee" + (isDragging ? " is-dragging" : "")}
+      aria-label="Technical skills. Drag horizontally to explore."
+      tabIndex={0}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onKeyDown={(event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        carouselRef.current?.scrollBy({
+          left: event.key === "ArrowRight" ? 184 : -184,
+          behavior: "smooth",
+        });
+      }}
+      onDragStart={(event) => event.preventDefault()}
+    >
+      <div className="skills-track">
+        <SkillRail duplicate />
+        <SkillRail />
+        <SkillRail duplicate />
+      </div>
+    </div>
+  );
+}
 
 function ProjectTile({ project, index }: { project: Project; index: number }) {
   return (
@@ -186,27 +302,6 @@ export function PortfolioHome() {
           </div>
         </section>
 
-        <section className="live-band" id="live" aria-labelledby="live-title">
-          <div className="shell">
-            <ScrollReveal>
-              <div className="live-heading">
-                <div>
-                  <p className="eyebrow">
-                    <Radio size={14} aria-hidden="true" />
-                    Live signal
-                  </p>
-                  <h2 id="live-title">A portfolio that changes while I do.</h2>
-                </div>
-                <p>
-                  Recent work, current interests, what is on, and the time in Dhaka. No
-                  polished timeline, just the actual signals.
-                </p>
-              </div>
-            </ScrollReveal>
-            <LiveSignal />
-          </div>
-        </section>
-
         <section className="work-section section" id="work" aria-labelledby="work-title">
           <div className="shell">
             <ScrollReveal>
@@ -264,73 +359,43 @@ export function PortfolioHome() {
           </div>
         </section>
 
-        <section className="receipts-section section" id="proof" aria-labelledby="proof-title">
-          <div className="shell">
-            <ScrollReveal>
-              <SectionHeading
-                id="proof-title"
-                eyebrow="Selected proof"
-                title="Proof, not a skill cloud."
-                copy="Production systems, product judgment, teaching, and hackathon pressure. A clearer answer to what I can own when an idea has to become real."
-              />
-            </ScrollReveal>
-
-            <div className="receipt-board">
-              {proofPoints.map((proof, index) => (
-                <ScrollReveal key={proof.label} delay={index * 60}>
-                  <div className={"receipt-row accent-" + proof.accent}>
-                    <div>
-                      <span>{proof.label}</span>
-                      <strong>{proof.value}</strong>
-                    </div>
-                    <p>{proof.detail}</p>
-                  </div>
-                </ScrollReveal>
-              ))}
-            </div>
-
-            <ScrollReveal>
-              <blockquote className="pressure-note">
-                <p>
-                  The build is only half the work. Presentation and market alignment decide
-                  whether good work gets understood.
-                </p>
-                <footer>What SOLVIO AI taught me after a Top 20 / 900 finish</footer>
-              </blockquote>
-            </ScrollReveal>
-          </div>
-        </section>
-
         <section
           className="story-section section"
           id="about"
           aria-labelledby="story-title"
         >
-          <div className="shell story-layout">
-            <ScrollReveal className="story-intro">
-              <p className="eyebrow">Builder log</p>
-              <h2 id="story-title">The resume is useful. The pattern is better.</h2>
-              <p>
-                I like owning the awkward middle between idea and shipped thing: interface,
-                server, business rules, edge cases, and the sentence that explains why it
-                matters.
-              </p>
+          <div className="shell about-layout">
+            <ScrollReveal className="about-title">
+              <p className="eyebrow">About / experience</p>
+              <h2 id="story-title">Work and education.</h2>
             </ScrollReveal>
 
-            <div className="timeline">
-              {experience.map((item, index) => (
-                <ScrollReveal key={item.title + item.place} delay={index * 60}>
-                  <article className="timeline-row">
-                    <div className="timeline-period">{item.period}</div>
-                    <div>
-                      <p>{item.place}</p>
-                      <h3>{item.title}</h3>
+            <ScrollReveal className="about-timeline" delay={80}>
+              {experience.map((item) => {
+                const isAcademic = item.title.toLowerCase().includes("undergraduate");
+
+                return (
+                  <article className="about-timeline-item" key={item.title + item.place}>
+                    <span className="about-timeline-marker" aria-hidden="true" />
+                    <div className="about-timeline-meta">
+                      <span>{isAcademic ? "Education" : "Work"}</span>
+                      <time>{item.period}</time>
                     </div>
-                    <p>{item.detail}</p>
+                    <div className="about-timeline-body">
+                      <h3>{item.title}</h3>
+                      <p className="about-timeline-place">{item.place}</p>
+                      <p>{item.detail}</p>
+                    </div>
                   </article>
-                </ScrollReveal>
-              ))}
-            </div>
+                );
+              })}
+
+              <Link className="about-loadout-link" href="/loadout">
+                <span>Tools, desk, and competitive setup</span>
+                <strong>View loadout</strong>
+                <ArrowUpRight size={17} aria-hidden="true" />
+              </Link>
+            </ScrollReveal>
           </div>
         </section>
 
@@ -357,52 +422,21 @@ export function PortfolioHome() {
           </div>
         </section>
 
-        <section className="loadout-teaser section" aria-labelledby="loadout-title">
-          <div className="shell loadout-layout">
+        <section className="skills-section section" id="skills" aria-labelledby="skills-title">
+          <div className="shell skills-heading">
             <ScrollReveal>
-              <p className="eyebrow">Loadout / tuned daily</p>
-              <h2 id="loadout-title">Everything has a setting.</h2>
-              <p>
-                Dev stack, creative tools, desk, peripherals, and the PC underneath it all.
-                Match history has its own off-hours tab instead of owning the story.
-              </p>
-              <Link className="text-link" href="/loadout">
-                Open full loadout
-                <ArrowRight size={18} aria-hidden="true" />
-              </Link>
+              <p className="eyebrow">Skill set / working toolkit</p>
+              <h2 id="skills-title">The tools move. The systems thinking stays.</h2>
             </ScrollReveal>
-
-            <ScrollReveal className="loadout-console" delay={100}>
-              <div className="console-head">
-                <span>WORK PROFILE</span>
-                <i aria-hidden="true" />
-                <span>SAMIYEEL</span>
-              </div>
-              <div className="console-main">
-                <div>
-                  <span>FRONTEND</span>
-                  <strong>REACT<br />NEXT.JS</strong>
-                </div>
-                <div>
-                  <span>BACKEND</span>
-                  <strong>NODE<br />EXPRESS</strong>
-                </div>
-                <div>
-                  <span>DATA / ML</span>
-                  <strong>PYTHON<br />POSTGRES</strong>
-                </div>
-                <div>
-                  <span>INTEGRATIONS</span>
-                  <strong>STRIPE<br />WEBHOOKS</strong>
-                </div>
-              </div>
-              <div className="console-foot">
-                <span>WEB SYSTEMS</span>
-                <span>AI / ML</span>
-                <span>PRODUCT MIND</span>
-              </div>
+            <ScrollReveal delay={80}>
+              <p>
+                A practical stack for building interfaces, backends, data products, and
+                production integrations. Drag the carousel to explore the stack.
+              </p>
             </ScrollReveal>
           </div>
+
+          <SkillsCarousel />
         </section>
       </main>
 
