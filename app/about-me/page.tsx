@@ -5,7 +5,7 @@ import { StructuredData } from "@/components/structured-data";
 
 const title = "About Samiyeel Alim Binaaf (Pronaaf2k)";
 const description =
-  "The story behind Samiyeel Alim Binaaf: a full-stack and AI/ML developer in Dhaka shaped by games, product work, teaching, and a refusal to leave useful things unfinished.";
+  "Experience, education, current activity, and selected work from Samiyeel Alim Binaaf, a full-stack and AI/ML developer in Dhaka.";
 
 export const metadata: Metadata = {
   title,
@@ -66,10 +66,20 @@ const aboutStructuredData = {
         "@type": "Place",
         name: "Dhaka, Bangladesh",
       },
-      alumniOf: {
-        "@type": "CollegeOrUniversity",
-        name: "North South University",
-      },
+      alumniOf: [
+        {
+          "@type": "CollegeOrUniversity",
+          name: "North South University",
+        },
+        {
+          "@type": "EducationalOrganization",
+          name: "SFX Green Herald International School",
+        },
+        {
+          "@type": "EducationalOrganization",
+          name: "BAF Shaheen English Medium School",
+        },
+      ],
       sameAs: [
         "https://github.com/Pronaaf2k",
         "https://www.linkedin.com/in/samiyeelalimbinaaf/",

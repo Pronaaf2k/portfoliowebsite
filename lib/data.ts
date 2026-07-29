@@ -288,30 +288,48 @@ export const gameReceipts = [
 
 export const experience = [
   {
-    period: "2026 — now",
+    kind: "work",
+    period: "2026 - now",
     title: "Full-stack developer",
     place: "VoloLeads / contract",
     detail:
-      "Turned a placeholder site into operating business infrastructure: interface, API, subscriptions, meeting booking, email, lifecycle cron jobs, analytics, deployment, and post-launch edge cases.",
+      "Built the interface, API, subscriptions, booking, email, analytics, deployment, and post-launch systems.",
   },
   {
-    period: "2023 — 2024",
+    kind: "work",
+    period: "Jan 2023 - May 2024",
     title: "Chief Marketing Officer",
     place: "Discount Den",
     detail:
-      "Worked on positioning, brand, campaigns, and growth. It is why I care how a product is understood, not only how it is implemented.",
+      "Led marketing strategy, brand positioning, growth initiatives, events, client meetings, and product planning.",
   },
   {
-    period: "2022 — now",
+    kind: "work",
+    period: "Jan 2022 - now",
     title: "Private tutor",
     place: "Cambridge O-Level / Pre O-Level",
     detail: "Teach mathematics and science one-on-one.",
   },
   {
-    period: "2022 — now",
-    title: "CSE undergraduate",
+    kind: "academic",
+    period: "Jan 2022 - now",
+    title: "BS Computer Science and Engineering",
     place: "North South University",
-    detail: "Studied AI/ML, secured systems, accessible products, and full-stack development.",
+    detail: "AI/ML, secured systems, accessible products, and full-stack development.",
+  },
+  {
+    kind: "academic",
+    period: "Jun 2018 - Jun 2020",
+    title: "A Levels",
+    place: "SFX Green Herald International School",
+    detail: "Physics, Chemistry, and Mathematics - GPA 4.5.",
+  },
+  {
+    kind: "academic",
+    period: "Jul 2004 - Jun 2018",
+    title: "O Levels",
+    place: "BAF Shaheen English Medium School",
+    detail: "Mathematics, Additional Mathematics, Physics, Chemistry, and English - GPA 5.0.",
   },
 ];
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Clock3, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const links = [
@@ -15,6 +15,27 @@ const links = [
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const [dhakaTime, setDhakaTime] = useState("--:--");
+
+  useEffect(() => {
+    const updateTime = () => {
+      setDhakaTime(
+        new Intl.DateTimeFormat("en-GB", {
+          timeZone: "Asia/Dhaka",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }).format(new Date()),
+      );
+    };
+
+    const startTimer = window.setTimeout(updateTime, 0);
+    const clockTimer = window.setInterval(updateTime, 30_000);
+    return () => {
+      window.clearTimeout(startTimer);
+      window.clearInterval(clockTimer);
+    };
+  }, []);
 
   useEffect(() => {
     document.body.classList.toggle("menu-open", open);
@@ -46,7 +67,7 @@ export function SiteHeader() {
           <span className="brand-mark">S/AB</span>
           <span className="brand-copy">
             Samiyeel
-            <small>Dhaka / UTC+6</small>
+            <small>Dhaka / {dhakaTime}</small>
           </span>
         </Link>
 
@@ -58,10 +79,13 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <a className="availability" href="mailto:benaaf2000@gmail.com">
-          <span className="status-dot" aria-hidden="true" />
-          Open to work
-        </a>
+        <div className="availability local-time" aria-label={`Dhaka local time ${dhakaTime}`}>
+          <Clock3 size={15} aria-hidden="true" />
+          <span className="local-time-copy">
+            <small>Dhaka local</small>
+            <strong>{dhakaTime}</strong>
+          </span>
+        </div>
 
         <button
           className="icon-button menu-button"

@@ -2,16 +2,17 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, Mail } from "lucide-react";
+import { ArrowDown, Mail, Radio } from "lucide-react";
 import { type PointerEvent, useRef } from "react";
 
+import { LiveSignal } from "@/components/live-signal";
 import { SiteHeader } from "@/components/site-header";
 import { experience, profile } from "@/lib/data";
 
 import styles from "@/app/about-me/about.module.css";
 
-const workExperience = experience.filter((item) => item.title !== "CSE undergraduate");
-const academicExperience = experience.filter((item) => item.title === "CSE undergraduate");
+const workExperience = experience.filter((item) => item.kind === "work");
+const academicExperience = experience.filter((item) => item.kind === "academic");
 
 export function AboutPage() {
   const portraitRef = useRef<HTMLDivElement>(null);
@@ -116,8 +117,22 @@ export function AboutPage() {
           </div>
         </div>
       </section>
-
-      <section className={styles.timeline} id="work-experience" aria-labelledby="work-title">
+      <section className="live-band" id="activity" aria-labelledby="activity-title">
+        <div className="shell">
+          <div className="live-heading">
+            <div>
+              <p className="eyebrow">
+                <Radio size={14} aria-hidden="true" />
+                Current activity
+              </p>
+              <h2 id="activity-title">A portfolio that changes while I do.</h2>
+            </div>
+            <p>Recent GitHub activity, listening, play, and the current time in Dhaka.</p>
+          </div>
+          <LiveSignal />
+        </div>
+      </section>
+      <section className={`${styles.timeline} ${styles.workTimeline}`} id="work-experience" aria-labelledby="work-title">
         <div className={styles.shell}>
           <header className={styles.timelineHeading}>
             <p className={styles.sectionLabel}>EXPERIENCE / WORK</p>
@@ -127,7 +142,7 @@ export function AboutPage() {
         </div>
       </section>
 
-      <section className={styles.timeline} aria-labelledby="academic-title">
+      <section className={`${styles.timeline} ${styles.academicTimeline}`} aria-labelledby="academic-title">
         <div className={styles.shell}>
           <header className={styles.timelineHeading}>
             <p className={styles.sectionLabel}>EXPERIENCE / ACADEMIC</p>
