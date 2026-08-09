@@ -387,13 +387,13 @@ export function PortfolioHome() {
 
             <ScrollReveal className="about-timeline" delay={80}>
               {experience.map((item) => {
-                const isAcademic = item.title.toLowerCase().includes("undergraduate");
+                const isAcademic = item.kind === "academic";
 
                 return (
                   <article className="about-timeline-item" key={item.title + item.place}>
                     <span className="about-timeline-marker" aria-hidden="true" />
                     <div className="about-timeline-meta">
-                      <span>{isAcademic ? "Education" : "Work"}</span>
+                      <span>{isAcademic ? "Academics" : "Work"}</span>
                       <time>{item.period}</time>
                     </div>
                     <div className="about-timeline-body">
