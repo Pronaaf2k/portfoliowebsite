@@ -13,6 +13,7 @@ import {
   ArrowUpRight,
   ChevronDown,
   Code2,
+  FileText,
   Gamepad2,
   Mail,
   Network,
@@ -299,6 +300,15 @@ export function PortfolioHome() {
                 >
                   LinkedIn
                   <ArrowUpRight size={17} aria-hidden="true" />
+                </a>
+                <a
+                  className="button button-secondary"
+                  href="/SamiyeelAlimBinaafResume.pdf"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open résumé
+                  <FileText size={17} aria-hidden="true" />
                 </a>
               </div>
             </div>
