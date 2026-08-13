@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Samiyeel Alim Binaaf — Portfolio Thumbnail</title>
+    <style>
+      :root {
+        --ink: #090b0d;
+        --paper: #f0eee8;
+        --muted: #9aa4a9;
+        --line: #273137;
+        --coral: #e95f4f;
+        --cyan: #63d8e8;
+        --yellow: #f4c95d;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+        background: #050607;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        font-family: "Arial Narrow", "Roboto Condensed", Arial, sans-serif;
+      }
+
+      .thumbnail {
+        position: relative;
+        isolation: isolate;
+        display: grid;
+        grid-template-columns: 55% 45%;
+        width: min(100vw, 1200px);
+        aspect-ratio: 1200 / 630;
+        overflow: hidden;
+        color: var(--paper);
+        background: var(--ink);
+        border-top: 9px solid var(--coral);
+      }
+
+      .thumbnail::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: radial-gradient(circle at 80% 57%, rgba(99, 216, 232, .08), transparent 34%);
+        pointer-events: none;
+      }
+
+      .identity {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-width: 0;
+        padding: 36px 30px 31px 45px;
+        border-right: 1px solid var(--line);
+      }
+
+      .eyebrow, .meta, .handle, .signal-labels {
+        font-family: Consolas, "Courier New", monospace;
+        text-transform: uppercase;
+        letter-spacing: .13em;
+      }
+
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        color: var(--cyan);
+        font-size: 12px;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--cyan);
+        box-shadow: 0 0 0 5px rgba(99, 216, 232, .1);
+      }
+
+      h1 {
+        max-width: 610px;
+        margin: 0;
+        font-size: clamp(56px, 7.7vw, 94px);
+        font-weight: 900;
+        line-height: .78;
+        letter-spacing: -.066em;
+        text-transform: uppercase;
+      }
+
+      h1 span { display: block; }
+
+      .bottom {
+        display: grid;
+        gap: 21px;
+      }
+
+      .role {
+        width: fit-content;
+        padding: 10px 14px 9px;
+        color: var(--ink);
+        background: var(--paper);
+        font-size: 19px;
+        font-weight: 800;
+        letter-spacing: .02em;
+        text-transform: uppercase;
+      }
+
+      .identity-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding-top: 15px;
+        border-top: 1px solid var(--line);
+      }
+
+      .handle {
+        color: var(--coral);
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .meta {
+        color: var(--muted);
+        font-size: 10px;
+        text-align: right;
+      }
+
+      .signal {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-width: 0;
+        padding: 36px 40px 31px;
+      }
+
+      .signal-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font: 11px/1 Consolas, "Courier New", monospace;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+
+      .signal-head strong { color: var(--yellow); }
+      .signal-head span { color: var(--muted); }
+
+      .scope {
+        position: relative;
+        height: 66%;
+        margin-inline: -8px;
+      }
+
+      .scope::before, .scope::after {
+        content: "";
+        position: absolute;
+        border: 1px solid rgba(99, 216, 232, .14);
+        border-radius: 50%;
+      }
+
+      .scope::before { width: 230px; height: 230px; right: -23px; top: 12%; }
+      .scope::after { width: 112px; height: 112px; right: 36px; top: 31%; }
+
+      svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+
+      .signal-labels {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 9px 24px;
+        padding-top: 15px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      .signal-labels span::before {
+        content: "/";
+        margin-right: 8px;
+        color: var(--cyan);
+      }
+
+      .signal-labels span:nth-child(2)::before { color: var(--yellow); }
+      .signal-labels span:nth-child(3)::before { color: var(--coral); }
+
+      /* Minimal thumbnail composition: derived from the portfolio hero, not the reference grid. */
+      .thumbnail { grid-template-columns: 1fr; border-top-width: 6px; }
+      .identity {
+        align-items: center;
+        justify-content: center;
+        padding: 58px;
+        border-right: 0;
+        text-align: center;
+      }
+      .eyebrow { margin-bottom: 20px; }
+      h1 {
+        max-width: none;
+        margin-bottom: 24px;
+        font-size: clamp(48px, 6.9vw, 84px);
+        line-height: .92;
+        letter-spacing: -.06em;
+      }
+      h1 span { display: inline; }
+      h1 span + span::before { content: " "; }
+      h1 span:last-child { color: var(--coral); }
+      .bottom { justify-items: center; gap: 27px; }
+      .role {
+        padding: 0;
+        color: var(--muted);
+        background: transparent;
+        font: 400 19px/1.5 Consolas, "Courier New", monospace;
+        letter-spacing: .01em;
+        text-transform: none;
+      }
+      .identity-meta { justify-content: center; padding: 0; border: 0; }
+      .handle {
+        padding: 10px 18px;
+        color: var(--paper);
+        background: #121619;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        font-size: 11px;
+      }
+      .meta, .signal { display: none; }
+      .connections {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 9px;
+      }
+      .connections a {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 13px 8px 9px;
+        color: #aeb8bd;
+        background: #121619;
+        border: 1px solid #20292e;
+        border-radius: 999px;
+        font: 700 9px/1 Consolas, "Courier New", monospace;
+        letter-spacing: .02em;
+        text-decoration: none;
+      }
+      .connections a:hover,
+      .connections a:focus-visible { color: var(--paper); border-color: var(--cyan); outline: none; }
+      .connection-icon {
+        display: grid;
+        place-items: center;
+        width: 18px;
+        height: 18px;
+        color: var(--ink);
+        background: var(--paper);
+        border-radius: 50%;
+        font: 900 8px/1 Arial, sans-serif;
+      }
+      .connection-icon svg { position: static; width: 11px; height: 11px; fill: currentColor; }
+
+      @media (max-width: 720px) {
+        .thumbnail { grid-template-columns: 58% 42%; }
+        .identity { padding: 22px 18px 20px 25px; }
+        .signal { padding: 22px 22px 20px; }
+        .role { font-size: 11px; padding: 7px 9px; }
+        .eyebrow, .handle { font-size: 8px; }
+        .meta, .signal-head, .signal-labels { font-size: 6px; }
+        .bottom { gap: 12px; }
+        .identity-meta { padding-top: 9px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="thumbnail" aria-label="Portfolio thumbnail for Samiyeel Alim Binaaf">
+      <section class="identity">
+        <div class="eyebrow"><i class="status-dot"></i> Available for work · Dhaka</div>
+
+        <h1><span>Samiyeel</span><span>Alim</span><span>Binaaf</span></h1>
+
+        <div class="bottom">
+          <div class="role">Code, data, games. Whatever comes next.</div>
+          <nav class="connections" aria-label="Connected profiles">
+            <a href="https://github.com/Pronaaf2k"><span class="connection-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 .7A11.5 11.5 0 0 0 8.36 23.1c.58.1.79-.25.79-.56v-2.23c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.77 2.72 1.26 3.38.96.1-.75.4-1.26.74-1.55-2.57-.29-5.27-1.28-5.27-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.75 0c2.19-1.49 3.16-1.18 3.16-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.71 5.39-5.29 5.68.42.36.79 1.06.79 2.14v3.18c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg></span>/Pronaaf2k</a>
+            <a href="https://www.linkedin.com/in/samiyeelalimbinaaf/"><span class="connection-icon">in</span>/samiyeelalimbinaaf</a>
+            <a href="https://steamcommunity.com/id/Samiyeel/"><span class="connection-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-9.93 8.84l5.34 2.2a2.8 2.8 0 0 1 1.62-.53l2.38-3.45v-.05a3.75 3.75 0 1 1 3.75 3.75h-.09l-3.39 2.42a2.83 2.83 0 1 1-5.49.92L2.4 14.53A10 10 0 1 0 12 2Zm-3.7 15.93-1.2-.5a2.12 2.12 0 0 0 1.12 1.16 2.07 2.07 0 0 0 1.6-3.82l-1.24-.51a1.55 1.55 0 1 1-.28 3.67Zm6.86-5.98a2.93 2.93 0 1 0 0-5.86 2.93 2.93 0 0 0 0 5.86Zm0-.73a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z"/></svg></span>/Samiyeel</a>
+            <a href="https://www.instagram.com/samiyeel"><span class="connection-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.2 2h9.6A5.2 5.2 0 0 1 22 7.2v9.6a5.2 5.2 0 0 1-5.2 5.2H7.2A5.2 5.2 0 0 1 2 16.8V7.2A5.2 5.2 0 0 1 7.2 2Zm-.18 2A3.02 3.02 0 0 0 4 7.02v9.96A3.02 3.02 0 0 0 7.02 20h9.96A3.02 3.02 0 0 0 20 16.98V7.02A3.02 3.02 0 0 0 16.98 4H7.02ZM17.5 5.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg></span>/samiyeel</a>
+            <a href="mailto:benaaf2000@gmail.com"><span class="connection-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3h15A2.5 2.5 0 0 1 22 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 18.5v-13Zm2.2-.3 7.8 6.15 7.8-6.15a.5.5 0 0 0-.3-.1h-15a.5.5 0 0 0-.3.1Zm15.8 2.4-7.38 5.82a1 1 0 0 1-1.24 0L4 7.6v10.9c0 .28.22.5.5.5h15a.5.5 0 0 0 .5-.5V7.6Z"/></svg></span>benaaf2000</a>
+          </nav>
+        </div>
+      </section>
+
+      <section class="signal" aria-label="Live signal graphic">
+        <div class="signal-head"><strong>Live signal</strong><span>Portfolio / 2026</span></div>
+
+        <div class="scope" aria-hidden="true">
+          <svg viewBox="0 0 500 350" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="wave" x1="0" x2="1">
+                <stop offset="0" stop-color="#63d8e8" />
+                <stop offset=".55" stop-color="#f4c95d" />
+                <stop offset="1" stop-color="#e95f4f" />
+              </linearGradient>
+              <pattern id="ticks" width="20" height="16" patternUnits="userSpaceOnUse">
+                <rect x="8" y="4" width="3" height="8" fill="#63d8e8" opacity=".25" />
+              </pattern>
+            </defs>
+            <rect x="0" y="130" width="500" height="120" fill="url(#ticks)" />
+            <path d="M0 230 C52 232 58 188 108 198 S166 259 203 175 S263 60 298 139 S346 307 389 248 S426 113 500 144" fill="none" stroke="url(#wave)" stroke-width="4" />
+            <g fill="#090b0d" stroke="#e95f4f" stroke-width="3">
+              <circle cx="203" cy="175" r="8" /><circle cx="389" cy="248" r="8" />
+            </g>
+            <g fill="#63d8e8"><circle cx="108" cy="198" r="4" /><circle cx="346" cy="307" r="4" /></g>
+          </svg>
+        </div>
+
+        <div class="signal-labels">
+          <span>Shipped systems</span><span>Machine learning</span>
+          <span>Music + data</span><span>Competitive precision</span>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

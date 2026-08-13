@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     username: "Pronaaf2k",
     images: [
       {
-        url: "/images/imagedefault.webp",
+        url: "/opengraph-image",
         width: 1200,
         height: 630,
         alt: "Portfolio of Samiyeel Alim Binaaf, full-stack and AI/ML developer known as Pronaaf2k",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
       "Production web systems, AI/ML projects, music tools, and esports achievements from Dhaka.",
     images: [
       {
-        url: "/images/imagedefault.webp",
+        url: "/opengraph-image",
         alt: "Portfolio of Samiyeel Alim Binaaf, full-stack and AI/ML developer known as Pronaaf2k",
       },
     ],
