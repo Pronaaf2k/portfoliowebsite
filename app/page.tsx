@@ -23,9 +23,9 @@ export const metadata: Metadata = {
     username: "Pronaaf2k",
     images: [
       {
-        url: "/opengraph-image",
-        width: 1200,
-        height: 630,
+        url: "/images/portfolio-social-v2.png?v=2",
+        width: 1678,
+        height: 874,
         alt: "Portfolio of Samiyeel Alim Binaaf, full-stack and AI/ML developer known as Pronaaf2k",
       },
     ],
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
       "Production web systems, AI/ML projects, music tools, and esports achievements from Dhaka.",
     images: [
       {
-        url: "/opengraph-image",
+        url: "/images/portfolio-social-v2.png?v=2",
         alt: "Portfolio of Samiyeel Alim Binaaf, full-stack and AI/ML developer known as Pronaaf2k",
       },
     ],
