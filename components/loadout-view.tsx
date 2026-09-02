@@ -29,6 +29,7 @@ import {
   tournamentResults,
 } from "@/lib/data";
 import { AimChallenge } from "@/components/aim-challenge";
+import { LoadoutArcade } from "@/components/loadout-arcade";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteHeader } from "@/components/site-header";
 
@@ -260,6 +261,8 @@ export function LoadoutView() {
                   );
                 })}
               </div>
+
+              {active === "play" ? <LoadoutArcade /> : null}
             </div>
 
             <ScrollReveal className="match-history">

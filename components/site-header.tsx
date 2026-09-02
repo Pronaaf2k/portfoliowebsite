@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 
 const links = [
   { label: "Portfolio", href: "/#work" },
-  { label: "About", href: "/about-me" },
-  { label: "Music", href: "/#music-exchange" },
   { label: "Skills", href: "/#skills" },
-  { label: "Loadout", href: "/loadout" },
+  { label: "Music", href: "/#music-exchange" },
   { label: "Contact", href: "/#contact" },
+  { label: "About", href: "/about-me" },
+  { label: "Loadout", href: "/loadout" },
 ];
 
 export function SiteHeader() {
