@@ -2,7 +2,7 @@
   --ink:#090b0d;--ink-soft:#11151a;--ink-raised:#171c21;--paper:#f0eee8;
   --fog:#a8b0b6;--line:#2d343a;--cyan:#78dce8;--coral:#ff6b57;
   --gold:#f4c95d;--blue:#547eff;--green:#91d18b;
-  --display:"Archivo Variable","Arial Narrow",sans-serif;
+  --display:"Newsreader Variable","Iowan Old Style","Palatino Linotype",Georgia,serif;
   --body:"Manrope Variable","Segoe UI",sans-serif;
   --mono:"IBM Plex Mono","Cascadia Code",monospace;
   --shell:1240px;--header-height:72px;
@@ -59,7 +59,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 .hero-inner{position:relative;z-index:2;display:grid;height:100%;grid-template-columns:minmax(0,1.12fr) minmax(360px,.88fr);align-items:center;gap:clamp(40px,5vw,76px);padding-top:var(--header-height);pointer-events:none}
 .hero-copy{position:relative;z-index:2;display:flex;min-width:0;flex-direction:column;justify-content:center;padding-block:48px 76px;pointer-events:auto}
 .hero-eyebrow{margin-bottom:24px;color:#c8cecf;opacity:0;animation:hero-arrive .72s .16s cubic-bezier(.2,.72,.2,1) forwards}
-.hero h1{margin:0;color:var(--paper);font-family:var(--display);font-size:92px;font-stretch:82%;font-weight:780;line-height:.86;text-transform:uppercase;letter-spacing:0}
+.hero h1{margin:0;color:var(--paper);font-family:var(--display);font-size:92px;font-optical-sizing:auto;font-weight:650;line-height:.9;text-transform:uppercase;letter-spacing:-.025em}
 .hero h1 span{display:block;opacity:0;animation:hero-arrive .82s cubic-bezier(.2,.72,.2,1) forwards}
 .hero h1 span:first-child{animation-delay:.23s}
 .hero h1 span:last-child{color:var(--cyan);animation-delay:.31s}
