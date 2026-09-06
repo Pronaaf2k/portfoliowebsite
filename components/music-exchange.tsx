@@ -36,6 +36,18 @@ type RequestState = "idle" | "loading" | "success" | "error";
 
 const PIN_CAROUSEL_PAGE_SIZE = 6;
 
+function pinLoopPageCount(pinCount: number) {
+  if (!pinCount) return 0;
+
+  // End a loop only when both the record order and six-card layout align.
+  // With 27 pins this is 54 slots: ...25,26,27,1,2,3,4... instead of
+  // padding one group with 1,2,3 and immediately restarting at 1 again.
+  let a = pinCount;
+  let b = PIN_CAROUSEL_PAGE_SIZE;
+  while (b) [a, b] = [b, a % b];
+  return pinCount / a;
+}
+
 function TrackArtwork({ track, sizes }: { track: MusicTrack; sizes: string }) {
   return (
     <span className="music-artwork" aria-hidden="true">
@@ -151,6 +163,7 @@ export function MusicExchange() {
   const [isDragging, setIsDragging] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
+  const activePointerRef = useRef<number | null>(null);
   const suppressClickRef = useRef(false);
   const dragStartXRef = useRef(0);
   const dragStartScrollRef = useRef(0);
@@ -159,7 +172,7 @@ export function MusicExchange() {
 
   const pinPages = pins.length
     ? Array.from(
-        { length: Math.ceil(pins.length / PIN_CAROUSEL_PAGE_SIZE) },
+        { length: pinLoopPageCount(pins.length) },
         (_, pageIndex) => Array.from(
           { length: PIN_CAROUSEL_PAGE_SIZE },
           (_, offset) => pins[
@@ -231,33 +244,37 @@ export function MusicExchange() {
 
   const handleCarouselPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     const carousel = carouselRef.current;
-    if (!carousel) return;
+    if (!carousel || event.button !== 0 || !event.isPrimary) return;
 
     isDraggingRef.current = true;
+    activePointerRef.current = event.pointerId;
     suppressClickRef.current = false;
     setIsDragging(true);
     dragStartXRef.current = event.clientX;
     dragStartScrollRef.current = carousel.scrollLeft;
-    event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const handleCarouselPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     const carousel = carouselRef.current;
-    if (!carousel || !isDraggingRef.current) return;
+    if (!carousel || activePointerRef.current !== event.pointerId) return;
 
     const movement = event.clientX - dragStartXRef.current;
-    if (Math.abs(movement) > 4) suppressClickRef.current = true;
+    if (Math.abs(movement) <= 4 && !suppressClickRef.current) return;
+    suppressClickRef.current = true;
+    // Capture only after a real drag so ordinary taps still open Spotify.
+    event.currentTarget.setPointerCapture(event.pointerId);
 
     const segment = getCarouselSegmentWidth();
     let nextScroll = dragStartScrollRef.current - movement;
     if (segment) {
-      if (nextScroll >= segment * 2) nextScroll -= segment;
-      if (nextScroll <= 0) nextScroll += segment;
+      nextScroll = segment + ((nextScroll - segment) % segment + segment) % segment;
     }
     carousel.scrollLeft = nextScroll;
   };
 
   const handleCarouselPointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (activePointerRef.current !== event.pointerId) return;
+    activePointerRef.current = null;
     isDraggingRef.current = false;
     setIsDragging(false);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
@@ -576,8 +593,14 @@ export function MusicExchange() {
             onPointerMove={handleCarouselPointerMove}
             onPointerUp={handleCarouselPointerEnd}
             onPointerCancel={handleCarouselPointerEnd}
+            onLostPointerCapture={handleCarouselPointerEnd}
+            onPointerLeave={(event) => {
+              if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+                handleCarouselPointerEnd(event);
+              }
+            }}
             onClickCapture={(event) => {
-              if (!suppressClickRef.current) return;
+              if (!suppressClickRef.current || event.detail === 0) return;
               event.preventDefault();
               event.stopPropagation();
               suppressClickRef.current = false;
@@ -587,7 +610,7 @@ export function MusicExchange() {
               event.preventDefault();
               carouselRef.current?.scrollBy({
                 left: event.key === "ArrowRight" ? 240 : -240,
-                behavior: "smooth",
+                behavior: "auto",
               });
             }}
             onDragStart={(event) => event.preventDefault()}
