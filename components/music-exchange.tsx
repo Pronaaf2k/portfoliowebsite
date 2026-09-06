@@ -86,16 +86,13 @@ function MusicPinRail({
           key={(hidden ? "duplicate-" : "") + (pagePins[0]?.id ?? pageIndex)}
           role="group"
           aria-label={
-            "Pinned songs " +
-            (pageIndex * PIN_CAROUSEL_PAGE_SIZE + 1) +
-            " to " +
-            (pageIndex * PIN_CAROUSEL_PAGE_SIZE + pagePins.length)
+            "Pinned song group " + (pageIndex + 1)
           }
         >
-          {pagePins.map((pin) => (
+          {pagePins.map((pin, pinIndex) => (
             <a
               className="music-pin-card"
-              key={pin.id}
+              key={pin.id + "-" + pageIndex + "-" + pinIndex}
               tabIndex={hidden ? -1 : undefined}
               href={pin.track.spotifyUrl}
               target="_blank"
@@ -160,13 +157,17 @@ export function MusicExchange() {
   const activeSearchRef = useRef<AbortController | null>(null);
   const hasDrawnGiftRef = useRef(false);
 
-  const pinPages = Array.from(
-    { length: Math.ceil(pins.length / PIN_CAROUSEL_PAGE_SIZE) },
-    (_, pageIndex) => pins.slice(
-      pageIndex * PIN_CAROUSEL_PAGE_SIZE,
-      (pageIndex + 1) * PIN_CAROUSEL_PAGE_SIZE,
-    ),
-  );
+  const pinPages = pins.length
+    ? Array.from(
+        { length: Math.ceil(pins.length / PIN_CAROUSEL_PAGE_SIZE) },
+        (_, pageIndex) => Array.from(
+          { length: PIN_CAROUSEL_PAGE_SIZE },
+          (_, offset) => pins[
+            (pageIndex * PIN_CAROUSEL_PAGE_SIZE + offset) % pins.length
+          ],
+        ),
+      )
+    : [];
 
   const getCarouselSegmentWidth = () => {
     const carousel = carouselRef.current;
