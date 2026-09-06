@@ -26,7 +26,6 @@ const RATE_LIMIT_TTL_SECONDS = 3_700;
 const INBOX_MAX_ENTRIES = 5_000;
 const INBOX_STREAM = "music:inbox";
 const INBOX_INDEX = "music:inbox:index";
-const PUBLIC_PIN_LIMIT = 24;
 const CONTROL_CHARACTERS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
 
 type MusicDropInput = {
@@ -371,15 +370,14 @@ function toPublicPin(value: unknown): MusicPin | null {
   };
 }
 
-export async function listPublicMusicPins(limit = PUBLIC_PIN_LIMIT) {
+export async function listPublicMusicPins() {
   if (!isMusicPinboardConfigured()) return [];
 
-  const safeLimit = Math.min(PUBLIC_PIN_LIMIT, Math.max(1, Math.floor(limit)));
   const entries = await redisCommand<unknown[]>([
     "ZREVRANGE",
     INBOX_INDEX,
     0,
-    safeLimit - 1,
+    -1,
   ]);
 
   return entries.flatMap((entry) => {

@@ -14,7 +14,15 @@ import {
   Send,
   Shuffle,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import type {
   MusicDropResponse,
   MusicPin,
@@ -25,6 +33,8 @@ import type {
 } from "@/lib/music-types";
 
 type RequestState = "idle" | "loading" | "success" | "error";
+
+const PIN_CAROUSEL_PAGE_SIZE = 6;
 
 function TrackArtwork({ track, sizes }: { track: MusicTrack; sizes: string }) {
   return (
@@ -61,6 +71,60 @@ function formatPinDate(value: string) {
   }).format(date);
 }
 
+function MusicPinRail({
+  pages,
+  hidden = false,
+}: {
+  pages: MusicPin[][];
+  hidden?: boolean;
+}) {
+  return (
+    <div className="music-pin-rail" aria-hidden={hidden || undefined}>
+      {pages.map((pagePins, pageIndex) => (
+        <div
+          className="music-pin-page"
+          key={(hidden ? "duplicate-" : "") + (pagePins[0]?.id ?? pageIndex)}
+          role="group"
+          aria-label={
+            "Pinned songs " +
+            (pageIndex * PIN_CAROUSEL_PAGE_SIZE + 1) +
+            " to " +
+            (pageIndex * PIN_CAROUSEL_PAGE_SIZE + pagePins.length)
+          }
+        >
+          {pagePins.map((pin) => (
+            <a
+              className="music-pin-card"
+              key={pin.id}
+              tabIndex={hidden ? -1 : undefined}
+              href={pin.track.spotifyUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={
+                "Listen to " + pin.track.name + " by " + pin.track.artists + " on Spotify"
+              }
+            >
+              <div className="music-pin-track">
+                <TrackArtwork track={pin.track} sizes="64px" />
+                <div>
+                  <strong>{pin.track.name}</strong>
+                  <small>{pin.track.artists}</small>
+                </div>
+              </div>
+              <blockquote>
+                {pin.note} <cite>~ {pin.sender}</cite>
+              </blockquote>
+              <time className="music-pin-date" dateTime={pin.createdAt}>
+                {formatPinDate(pin.createdAt)}
+              </time>
+            </a>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 async function fetchPublicPins() {
   const response = await fetch("/api/music/pins", { cache: "no-store" });
   const payload = (await response.json()) as MusicPinsResponse;
@@ -87,9 +151,34 @@ export function MusicExchange() {
   const [randomMessage, setRandomMessage] = useState("Playlist signal ready");
   const [pins, setPins] = useState<MusicPin[]>([]);
   const [pinState, setPinState] = useState<RequestState>("loading");
-  const pinRailRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const suppressClickRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const dragStartScrollRef = useRef(0);
   const activeSearchRef = useRef<AbortController | null>(null);
   const hasDrawnGiftRef = useRef(false);
+
+  const pinPages = Array.from(
+    { length: Math.ceil(pins.length / PIN_CAROUSEL_PAGE_SIZE) },
+    (_, pageIndex) => pins.slice(
+      pageIndex * PIN_CAROUSEL_PAGE_SIZE,
+      (pageIndex + 1) * PIN_CAROUSEL_PAGE_SIZE,
+    ),
+  );
+
+  const getCarouselSegmentWidth = () => {
+    const carousel = carouselRef.current;
+    if (!carousel) return 0;
+
+    const rails = carousel.querySelectorAll<HTMLElement>(".music-pin-rail");
+    if (rails.length > 1) {
+      return rails[1].getBoundingClientRect().left - rails[0].getBoundingClientRect().left;
+    }
+
+    return carousel.scrollWidth / 3;
+  };
 
   const loadPins = async () => {
     try {
@@ -118,96 +207,62 @@ export function MusicExchange() {
     };
   }, []);
 
-
   useEffect(() => {
-    const rail = pinRailRef.current;
-    if (!rail) return;
+    const carousel = carouselRef.current;
+    if (!carousel || !pinPages.length) return;
 
-    const desktopPointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-    let activePointer: number | null = null;
-    let dragStartX = 0;
-    let dragStartScroll = 0;
-    let dragged = false;
+    const segmentWidth = () => getCarouselSegmentWidth();
+    carousel.scrollLeft = segmentWidth();
 
-    const onWheel = (event: WheelEvent) => {
-      if (!desktopPointer.matches || rail.scrollWidth <= rail.clientWidth) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-      const delta =
-        Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-      if (!delta) return;
+    const intervalId = window.setInterval(() => {
+      const segment = segmentWidth();
+      if (!segment || isDraggingRef.current) return;
 
-      const atStart = rail.scrollLeft <= 0 && delta < 0;
-      const atEnd =
-        rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 1 && delta > 0;
-      if (atStart || atEnd) return;
+      if (carousel.scrollLeft >= segment * 2) carousel.scrollLeft -= segment;
+      if (carousel.scrollLeft <= 0) carousel.scrollLeft += segment;
+      carousel.scrollLeft += 1;
+    }, 24);
 
-      event.preventDefault();
-      rail.scrollLeft += delta;
-    };
+    return () => window.clearInterval(intervalId);
+  }, [pinPages.length]);
 
-    const onPointerDown = (event: PointerEvent) => {
-      if (
-        !desktopPointer.matches ||
-        event.button !== 0 ||
-        rail.scrollWidth <= rail.clientWidth
-      ) {
-        return;
-      }
+  const handleCarouselPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
 
-      activePointer = event.pointerId;
-      dragStartX = event.clientX;
-      dragStartScroll = rail.scrollLeft;
-      dragged = false;
-      rail.setPointerCapture(event.pointerId);
-    };
+    isDraggingRef.current = true;
+    suppressClickRef.current = false;
+    setIsDragging(true);
+    dragStartXRef.current = event.clientX;
+    dragStartScrollRef.current = carousel.scrollLeft;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
 
-    const onPointerMove = (event: PointerEvent) => {
-      if (event.pointerId !== activePointer) return;
+  const handleCarouselPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const carousel = carouselRef.current;
+    if (!carousel || !isDraggingRef.current) return;
 
-      const movement = event.clientX - dragStartX;
-      if (Math.abs(movement) < 4 && !dragged) return;
+    const movement = event.clientX - dragStartXRef.current;
+    if (Math.abs(movement) > 4) suppressClickRef.current = true;
 
-      dragged = true;
-      event.preventDefault();
-      rail.classList.add("is-dragging");
-      rail.scrollLeft = dragStartScroll - movement;
-    };
+    const segment = getCarouselSegmentWidth();
+    let nextScroll = dragStartScrollRef.current - movement;
+    if (segment) {
+      if (nextScroll >= segment * 2) nextScroll -= segment;
+      if (nextScroll <= 0) nextScroll += segment;
+    }
+    carousel.scrollLeft = nextScroll;
+  };
 
-    const finishDrag = (event: PointerEvent) => {
-      if (event.pointerId !== activePointer) return;
-      if (rail.hasPointerCapture(event.pointerId)) {
-        rail.releasePointerCapture(event.pointerId);
-      }
-      activePointer = null;
-      rail.classList.remove("is-dragging");
-      window.setTimeout(() => {
-        dragged = false;
-      }, 0);
-    };
-
-    const preventDraggedClick = (event: MouseEvent) => {
-      if (!dragged) return;
-      event.preventDefault();
-      event.stopPropagation();
-      dragged = false;
-    };
-
-    rail.addEventListener("wheel", onWheel, { passive: false });
-    rail.addEventListener("pointerdown", onPointerDown);
-    rail.addEventListener("pointermove", onPointerMove);
-    rail.addEventListener("pointerup", finishDrag);
-    rail.addEventListener("pointercancel", finishDrag);
-    rail.addEventListener("click", preventDraggedClick, true);
-
-    return () => {
-      rail.removeEventListener("wheel", onWheel);
-      rail.removeEventListener("pointerdown", onPointerDown);
-      rail.removeEventListener("pointermove", onPointerMove);
-      rail.removeEventListener("pointerup", finishDrag);
-      rail.removeEventListener("pointercancel", finishDrag);
-      rail.removeEventListener("click", preventDraggedClick, true);
-    };
-  }, []);
+  const handleCarouselPointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
 
   const searchTracks = useCallback(async (rawQuery: string) => {
     const value = rawQuery.trim();
@@ -321,15 +376,7 @@ export function MusicExchange() {
       setResults([]);
       setSearchState("idle");
       setSearchMessage("Waiting for a track");
-      void loadPins().then(() => {
-        const reducedMotion = window.matchMedia(
-          "(prefers-reduced-motion: reduce)",
-        ).matches;
-        pinRailRef.current?.scrollTo({
-          left: 0,
-          behavior: reducedMotion ? "auto" : "smooth",
-        });
-      });
+      void loadPins();
     } catch (error) {
       setDropState("error");
       setDropMessage(error instanceof Error ? error.message : "The note could not be sent");
@@ -517,14 +564,32 @@ export function MusicExchange() {
                 Pieces of your worlds, left here with me.
               </h3>
             </div>
-
           </div>
 
           <div
-            className="music-pin-rail"
-            ref={pinRailRef}
+            ref={carouselRef}
+            className={"music-pin-carousel" + (isDragging ? " is-dragging" : "")}
             tabIndex={0}
-            aria-label="Recently pinned songs"
+            aria-label="Public pinned songs. Drag horizontally to explore."
+            onPointerDown={handleCarouselPointerDown}
+            onPointerMove={handleCarouselPointerMove}
+            onPointerUp={handleCarouselPointerEnd}
+            onPointerCancel={handleCarouselPointerEnd}
+            onClickCapture={(event) => {
+              if (!suppressClickRef.current) return;
+              event.preventDefault();
+              event.stopPropagation();
+              suppressClickRef.current = false;
+            }}
+            onKeyDown={(event) => {
+              if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+              event.preventDefault();
+              carouselRef.current?.scrollBy({
+                left: event.key === "ArrowRight" ? 240 : -240,
+                behavior: "smooth",
+              });
+            }}
+            onDragStart={(event) => event.preventDefault()}
           >
             {pinState === "loading" ? (
               <div className="music-pin-page is-loading" aria-hidden="true">
@@ -533,46 +598,11 @@ export function MusicExchange() {
                 ))}
               </div>
             ) : pins.length ? (
-              Array.from({ length: Math.ceil(pins.length / 6) }, (_, pageIndex) => (
-                <div
-                  className="music-pin-page"
-                  key={pins[pageIndex * 6]?.id ?? pageIndex}
-                  role="group"
-                  aria-label={
-                    "Pinned songs " +
-                    (pageIndex * 6 + 1) +
-                    " to " +
-                    Math.min((pageIndex + 1) * 6, pins.length)
-                  }
-                >
-                  {pins.slice(pageIndex * 6, (pageIndex + 1) * 6).map((pin) => (
-                    <a
-                      className="music-pin-card"
-                      key={pin.id}
-                      href={pin.track.spotifyUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={
-                        "Listen to " + pin.track.name + " by " + pin.track.artists + " on Spotify"
-                      }
-                    >
-                      <div className="music-pin-track">
-                        <TrackArtwork track={pin.track} sizes="64px" />
-                        <div>
-                          <strong>{pin.track.name}</strong>
-                          <small>{pin.track.artists}</small>
-                        </div>
-                      </div>
-                      <blockquote>
-                        {pin.note} <cite>~ {pin.sender}</cite>
-                      </blockquote>
-                      <time className="music-pin-date" dateTime={pin.createdAt}>
-                        {formatPinDate(pin.createdAt)}
-                      </time>
-                    </a>
-                  ))}
-                </div>
-              ))
+              <div className="music-pin-track-loop">
+                <MusicPinRail pages={pinPages} hidden />
+                <MusicPinRail pages={pinPages} />
+                <MusicPinRail pages={pinPages} hidden />
+              </div>
             ) : (
               <div className="music-pin-empty">
                 <Pin size={25} strokeWidth={1.4} aria-hidden="true" />
