@@ -2,8 +2,10 @@
   --ink:#090b0d;--ink-soft:#11151a;--ink-raised:#171c21;--paper:#f0eee8;
   --fog:#a8b0b6;--line:#2d343a;--cyan:#78dce8;--coral:#ff6b57;
   --gold:#f4c95d;--blue:#547eff;--green:#91d18b;
-  --display:"Newsreader Variable","Iowan Old Style","Palatino Linotype",Georgia,serif;
-  --body:"Manrope Variable","Segoe UI",sans-serif;
+  --display:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  --body:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  --editorial:"EB Garamond Variable",Garamond,Georgia,serif;
+  --project-title:Georgia,"Times New Roman",serif;
   --mono:"IBM Plex Mono","Cascadia Code",monospace;
   --shell:1240px;--header-height:72px;
 }
@@ -120,8 +122,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 .project-card:hover .project-media img{filter:saturate(1.08) contrast(1.03);transform:scale(1.025)}
 .project-body{display:flex;flex:1;flex-direction:column;padding:26px}.project-featured .project-body{padding:38px}
 .project-meta{display:flex;justify-content:space-between;gap:20px;color:var(--fog);font-family:var(--mono);font-size:9px;text-transform:uppercase}
-.project-body h3{margin:29px 0 0;font-family:var(--display);font-size:39px;line-height:1}.project-featured .project-body h3{margin-top:48px;font-size:52px}
-.project-statement{margin:14px 0 0;font-family:var(--display);font-size:21px;font-weight:570;line-height:1.22}
+.project-body h3{margin:29px 0 0;font-family:var(--project-title);font-size:39px;font-weight:400;line-height:1.1;letter-spacing:-.025em}.project-featured .project-body h3{margin-top:48px;font-size:52px}
+.project-statement{margin:14px 0 0;font-family:var(--body);font-size:21px;font-weight:500;line-height:1.35}
 .project-description{margin:16px 0 0;color:var(--fog);font-size:13px;line-height:1.65}
 .project-proof{margin-top:24px;border-left:2px solid var(--cyan);padding-left:13px;color:#d4d8d9;font-family:var(--mono);font-size:10px;line-height:1.55;text-transform:uppercase}
 
@@ -166,7 +168,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
 .next-build{overflow:hidden;border-bottom:1px solid #46606b;background:#283e47;color:#edf1ef}
 .next-build-intro{display:grid;grid-template-columns:minmax(220px,.38fr) minmax(0,1fr);align-items:end;gap:72px;margin-bottom:50px}
 .next-build-intro>.eyebrow{align-self:start;margin:8px 0 0;color:var(--gold)}
-.next-build-heading h2{max-width:820px;margin:0;font-family:var(--display);font-size:62px;line-height:.95}
+.next-build-heading h2{max-width:820px;margin:0;font-family:var(--editorial);font-size:62px;font-weight:500;line-height:1.05;letter-spacing:-.025em}
 .next-build-heading>p{max-width:620px;margin:22px 0 0;color:#c3cfd0;font-size:15px;line-height:1.75}
 .music-exchange{overflow:hidden;border:1px solid rgba(237,241,239,.38);background:#0b1115;color:var(--paper)}
 .music-exchange-head,.music-exchange-foot{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:13px 16px;color:#aebbc0;font-family:var(--mono);font-size:8px;text-transform:uppercase}

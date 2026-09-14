@@ -93,7 +93,7 @@
   max-width: 760px;
   margin: 0;
   font-size: 5.7rem;
-  line-height: 0.88;
+  line-height: 1.08;
   letter-spacing: 0;
 }
 
@@ -1014,7 +1014,7 @@
 
   .hero h1 {
     font-size: 3.25rem;
-    line-height: 0.94;
+    line-height: 1.08;
   }
 
   .heroStatement {

@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource-variable/newsreader";
-import "@fontsource-variable/manrope";
+import "@fontsource-variable/eb-garamond";
 import "@fontsource/ibm-plex-mono/400.css";
 import "./globals.css";
 import {
