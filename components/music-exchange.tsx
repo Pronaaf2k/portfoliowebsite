@@ -86,9 +86,11 @@ function formatPinDate(value: string) {
 function MusicPinRail({
   pages,
   hidden = false,
+  uniqueCount,
 }: {
   pages: MusicPin[][];
   hidden?: boolean;
+  uniqueCount: number;
 }) {
   return (
     <div className="music-pin-rail" aria-hidden={hidden || undefined}>
@@ -96,6 +98,7 @@ function MusicPinRail({
         <div
           className="music-pin-page"
           key={(hidden ? "duplicate-" : "") + (pagePins[0]?.id ?? pageIndex)}
+          aria-hidden={hidden || pageIndex * PIN_CAROUSEL_PAGE_SIZE >= uniqueCount || undefined}
           role="group"
           aria-label={
             "Pinned song group " + (pageIndex + 1)
@@ -105,12 +108,13 @@ function MusicPinRail({
             <a
               className="music-pin-card"
               key={pin.id + "-" + pageIndex + "-" + pinIndex}
-              tabIndex={hidden ? -1 : undefined}
+              aria-hidden={hidden || pageIndex * PIN_CAROUSEL_PAGE_SIZE + pinIndex >= uniqueCount || undefined}
+              tabIndex={hidden || pageIndex * PIN_CAROUSEL_PAGE_SIZE + pinIndex >= uniqueCount ? -1 : undefined}
               href={pin.track.spotifyUrl}
               target="_blank"
               rel="noreferrer"
               aria-label={
-                "Listen to " + pin.track.name + " by " + pin.track.artists + " on Spotify"
+                "Listen to " + pin.track.name + " by " + pin.track.artists + " on Spotify. " + pin.note + " From " + pin.sender
               }
             >
               <div className="music-pin-track">
@@ -161,6 +165,8 @@ export function MusicExchange() {
   const [pins, setPins] = useState<MusicPin[]>([]);
   const [pinState, setPinState] = useState<RequestState>("loading");
   const [isDragging, setIsDragging] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const noteRef = useRef<HTMLTextAreaElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
   const activePointerRef = useRef<number | null>(null);
@@ -195,6 +201,7 @@ export function MusicExchange() {
   };
 
   const loadPins = async () => {
+    setPinState("loading");
     try {
       setPins(await fetchPublicPins());
       setPinState("success");
@@ -226,13 +233,12 @@ export function MusicExchange() {
     if (!carousel || !pinPages.length) return;
 
     const segmentWidth = () => getCarouselSegmentWidth();
-    carousel.scrollLeft = segmentWidth();
+    if (!carousel.scrollLeft) carousel.scrollLeft = segmentWidth();
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const intervalId = window.setInterval(() => {
       const segment = segmentWidth();
-      if (!segment || isDraggingRef.current) return;
+      if (!segment || isDraggingRef.current || paused || document.hidden || carousel.matches(":focus-within") || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
       if (carousel.scrollLeft >= segment * 2) carousel.scrollLeft -= segment;
       if (carousel.scrollLeft <= 0) carousel.scrollLeft += segment;
@@ -240,7 +246,7 @@ export function MusicExchange() {
     }, 24);
 
     return () => window.clearInterval(intervalId);
-  }, [pinPages.length]);
+  }, [pinPages.length, paused]);
 
   const handleCarouselPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     const carousel = carouselRef.current;
@@ -317,7 +323,7 @@ export function MusicExchange() {
       if (controller.signal.aborted) return;
       setResults([]);
       setSearchState("error");
-      setSearchMessage(error instanceof Error ? error.message : "Search is unavailable");
+      setSearchMessage((error instanceof Error ? error.message : "Search is unavailable") + ". Try searching again in a moment.");
     } finally {
       if (activeSearchRef.current === controller) activeSearchRef.current = null;
     }
@@ -368,7 +374,8 @@ export function MusicExchange() {
     const message = note.trim();
     if (message.length < 2) {
       setDropState("error");
-      setDropMessage("Leave at least a couple of words");
+      setDropMessage("Enter at least 2 characters, then pin the song again.");
+      noteRef.current?.focus();
       return;
     }
 
@@ -397,7 +404,7 @@ export function MusicExchange() {
       void loadPins();
     } catch (error) {
       setDropState("error");
-      setDropMessage(error instanceof Error ? error.message : "The note could not be sent");
+      setDropMessage((error instanceof Error ? error.message : "The note could not be sent") + ". Your note is still here. Try pinning it again in a moment.");
     }
   };
 
@@ -544,17 +551,21 @@ export function MusicExchange() {
                 <label>
                   <span>The note / public</span>
                   <textarea
+                    ref={noteRef}
+                    aria-invalid={dropState === "error" && note.trim().length < 2 || undefined}
+                    aria-describedby="music-note-hint music-note-status"
                     value={note}
                     onChange={(event) => setNote(event.target.value)}
                     maxLength={240}
                     rows={3}
                     required
                   />
+                  <span id="music-note-hint">2 to 240 characters.</span>
                 </label>
               </div>
 
               <div className="music-drop-foot">
-                <span className={"music-drop-message is-" + dropState} aria-live="polite">
+                <span id="music-note-status" className={"music-drop-message is-" + dropState} aria-live="polite">
                   {dropMessage || note.length + " / 240"}
                 </span>
                 <button
@@ -582,6 +593,7 @@ export function MusicExchange() {
                 Pieces of your worlds, left here with me.
               </h3>
             </div>
+            <button type="button" className="carousel-motion-button" aria-pressed={paused} onClick={() => setPaused(value => !value)}>{paused ? "Resume song scrolling" : "Pause song scrolling"}</button>
           </div>
 
           <div
@@ -623,19 +635,20 @@ export function MusicExchange() {
               </div>
             ) : pins.length ? (
               <div className="music-pin-track-loop">
-                <MusicPinRail pages={pinPages} hidden />
-                <MusicPinRail pages={pinPages} />
-                <MusicPinRail pages={pinPages} hidden />
+                <MusicPinRail uniqueCount={pins.length} pages={pinPages} hidden />
+                <MusicPinRail uniqueCount={pins.length} pages={pinPages} />
+                <MusicPinRail uniqueCount={pins.length} pages={pinPages} hidden />
               </div>
             ) : (
               <div className="music-pin-empty">
                 <Pin size={25} strokeWidth={1.4} aria-hidden="true" />
-                <strong>No songs pinned yet.</strong>
+                <strong>{pinState === "error" ? "Songs could not be loaded." : "No songs pinned yet."}</strong>
                 <span>
                   {pinState === "error"
-                    ? "The board is taking a quiet minute."
+                    ? "Try loading the board again."
                     : "Use the search above to leave the first one."}
                 </span>
+                {pinState === "error" && <button type="button" className="carousel-motion-button" onClick={() => void loadPins()}>Retry loading songs</button>}
               </div>
             )}
           </div>

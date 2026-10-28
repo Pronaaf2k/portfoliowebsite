@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/eb-garamond";
 import "@fontsource/ibm-plex-mono/400.css";
+import "@fontsource/ibm-plex-mono/500.css";
+import "@fontsource/ibm-plex-mono/600.css";
+import "@fontsource/ibm-plex-mono/700.css";
 import "./globals.css";
 import {
   identityLinks,

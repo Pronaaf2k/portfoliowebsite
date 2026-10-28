@@ -95,17 +95,18 @@ function SkillsCarousel() {
   const dragStartXRef = useRef(0);
   const dragStartScrollRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     const carousel = carouselRef.current;
     if (!carousel) return;
 
     const segmentWidth = () => carousel.scrollWidth / 3;
-    carousel.scrollLeft = segmentWidth();
+    if (!carousel.scrollLeft) carousel.scrollLeft = segmentWidth();
 
     const intervalId = window.setInterval(() => {
       const segment = segmentWidth();
-      if (!segment) return;
+      if (!segment || paused || document.hidden || carousel.matches(":focus-within") || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
       if (carousel.scrollLeft >= segment * 2) carousel.scrollLeft -= segment;
       if (carousel.scrollLeft <= 0) carousel.scrollLeft += segment;
@@ -113,7 +114,7 @@ function SkillsCarousel() {
     }, 24);
 
     return () => window.clearInterval(intervalId);
-  }, []);
+  }, [paused]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     const carousel = carouselRef.current;
@@ -149,6 +150,8 @@ function SkillsCarousel() {
   };
 
   return (
+    <>
+    <div className="shell carousel-controls"><button type="button" className="carousel-motion-button" aria-pressed={paused} onClick={() => setPaused(value => !value)}>{paused ? "Resume skills scrolling" : "Pause skills scrolling"}</button></div>
     <div
       ref={carouselRef}
       className={"skills-marquee" + (isDragging ? " is-dragging" : "")}
@@ -163,7 +166,7 @@ function SkillsCarousel() {
         event.preventDefault();
         carouselRef.current?.scrollBy({
           left: event.key === "ArrowRight" ? 184 : -184,
-          behavior: "smooth",
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
         });
       }}
       onDragStart={(event) => event.preventDefault()}
@@ -174,6 +177,7 @@ function SkillsCarousel() {
         <SkillRail duplicate />
       </div>
     </div>
+    </>
   );
 }
 
