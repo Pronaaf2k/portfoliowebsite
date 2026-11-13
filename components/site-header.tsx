@@ -63,7 +63,7 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <div className="shell header-inner">
-        <Link className="brand" href="/" aria-label="Samiyeel Alim Binaaf, home">
+        <Link className="brand" href="/" prefetch={false} aria-label="Samiyeel Alim Binaaf, home">
           <span className="brand-mark">S/AB</span>
           <span className="brand-copy">
             Samiyeel
@@ -73,7 +73,7 @@ export function SiteHeader() {
 
         <nav className="desktop-nav" aria-label="Primary navigation">
           {links.map((link) => (
-            <Link key={link.label} href={link.href}>
+            <Link key={link.label} href={link.href} prefetch={false}>
               {link.label}
             </Link>
           ))}
@@ -107,7 +107,7 @@ export function SiteHeader() {
         aria-hidden={!open}
       >
         {links.map((link) => (
-          <Link key={link.label} href={link.href} onClick={() => setOpen(false)}>
+          <Link key={link.label} href={link.href} prefetch={false} onClick={() => setOpen(false)}>
             {link.label}
           </Link>
         ))}

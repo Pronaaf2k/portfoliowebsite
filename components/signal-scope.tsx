@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 
 const channelColors = ["#78dce8", "#ff6b57", "#f4c95d", "#547eff"];
 const restingPointer = { x: 0.58, y: 0.45 };
+const frameInterval = 1000 / 30;
 
 function clamp(value: number) {
   return Math.min(1, Math.max(0, value));
@@ -28,6 +29,7 @@ export function SignalScope() {
     let width = 0;
     let height = 0;
     let animationId = 0;
+    let lastDrawTime = -Infinity;
     let isVisible = true;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -131,8 +133,17 @@ export function SignalScope() {
       context.arc(cursorX, cursorY, 2.4, 0, Math.PI * 2);
       context.fill();
 
-      frame += 1;
-      if (!reducedMotion && isVisible) animationId = requestAnimationFrame(draw);
+      frame += 2;
+    };
+
+    const animate = (time: number) => {
+      animationId = 0;
+      const elapsed = time - lastDrawTime;
+      if (elapsed >= frameInterval) {
+        lastDrawTime = Number.isFinite(elapsed) ? time - (elapsed % frameInterval) : time;
+        draw();
+      }
+      if (isVisible && width > 0) animationId = requestAnimationFrame(animate);
     };
 
     const requestDraw = () => {
@@ -142,7 +153,7 @@ export function SignalScope() {
       }
 
       if (isVisible && animationId === 0) {
-        animationId = requestAnimationFrame(draw);
+        animationId = requestAnimationFrame(animate);
       }
     };
 
@@ -159,6 +170,7 @@ export function SignalScope() {
         else {
           cancelAnimationFrame(animationId);
           animationId = 0;
+          lastDrawTime = -Infinity;
         }
       },
       { rootMargin: "120px" },

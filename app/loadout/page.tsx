@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LoadoutView } from "@/components/loadout-view";
+import "./loadout.css";
 import { StructuredData } from "@/components/structured-data";
 import { loadoutStructuredData } from "@/lib/seo";
 

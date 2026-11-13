@@ -1,4 +1,5 @@
 import { ErrorSignalGame } from "@/components/error-signal-game";
+import "./not-found.css";
 
 export default function NotFound() {
   return (

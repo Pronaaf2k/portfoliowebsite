@@ -15,8 +15,10 @@ import {
   Shuffle,
 } from "lucide-react";
 import {
+  memo,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ChangeEvent,
@@ -36,17 +38,10 @@ type RequestState = "idle" | "loading" | "success" | "error";
 
 const PIN_CAROUSEL_PAGE_SIZE = 6;
 
-function pinLoopPageCount(pinCount: number) {
-  if (!pinCount) return 0;
-
-  // End a loop only when both the record order and six-card layout align.
-  // With 27 pins this is 54 slots: ...25,26,27,1,2,3,4... instead of
-  // padding one group with 1,2,3 and immediately restarting at 1 again.
-  let a = pinCount;
-  let b = PIN_CAROUSEL_PAGE_SIZE;
-  while (b) [a, b] = [b, a % b];
-  return pinCount / a;
-}
+const pinDateFormatter = new Intl.DateTimeFormat("en", {
+  month: "short",
+  day: "numeric",
+});
 
 function TrackArtwork({ track, sizes }: { track: MusicTrack; sizes: string }) {
   return (
@@ -77,20 +72,15 @@ function formatPinDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Recently";
 
-  return new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-  }).format(date);
+  return pinDateFormatter.format(date);
 }
 
-function MusicPinRail({
+const MusicPinRail = memo(function MusicPinRail({
   pages,
   hidden = false,
-  uniqueCount,
 }: {
   pages: MusicPin[][];
   hidden?: boolean;
-  uniqueCount: number;
 }) {
   return (
     <div className="music-pin-rail" aria-hidden={hidden || undefined}>
@@ -98,18 +88,17 @@ function MusicPinRail({
         <div
           className="music-pin-page"
           key={(hidden ? "duplicate-" : "") + (pagePins[0]?.id ?? pageIndex)}
-          aria-hidden={hidden || pageIndex * PIN_CAROUSEL_PAGE_SIZE >= uniqueCount || undefined}
+          aria-hidden={hidden || undefined}
           role="group"
           aria-label={
             "Pinned song group " + (pageIndex + 1)
           }
         >
-          {pagePins.map((pin, pinIndex) => (
+          {pagePins.map((pin) => (
             <a
               className="music-pin-card"
-              key={pin.id + "-" + pageIndex + "-" + pinIndex}
-              aria-hidden={hidden || pageIndex * PIN_CAROUSEL_PAGE_SIZE + pinIndex >= uniqueCount || undefined}
-              tabIndex={hidden || pageIndex * PIN_CAROUSEL_PAGE_SIZE + pinIndex >= uniqueCount ? -1 : undefined}
+              key={pin.id}
+              tabIndex={hidden ? -1 : undefined}
               href={pin.track.spotifyUrl}
               target="_blank"
               rel="noreferrer"
@@ -136,10 +125,10 @@ function MusicPinRail({
       ))}
     </div>
   );
-}
+});
 
-async function fetchPublicPins() {
-  const response = await fetch("/api/music/pins", { cache: "no-store" });
+async function fetchPublicPins(signal: AbortSignal) {
+  const response = await fetch("/api/music/pins", { cache: "no-store", signal });
   const payload = (await response.json()) as MusicPinsResponse;
 
   if (!response.ok) {
@@ -168,25 +157,23 @@ export function MusicExchange() {
   const [paused, setPaused] = useState(false);
   const noteRef = useRef<HTMLTextAreaElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const giftSectionRef = useRef<HTMLElement>(null);
   const isDraggingRef = useRef(false);
   const activePointerRef = useRef<number | null>(null);
   const suppressClickRef = useRef(false);
   const dragStartXRef = useRef(0);
   const dragStartScrollRef = useRef(0);
   const activeSearchRef = useRef<AbortController | null>(null);
+  const activePinsRef = useRef<AbortController | null>(null);
   const hasDrawnGiftRef = useRef(false);
 
-  const pinPages = pins.length
-    ? Array.from(
-        { length: pinLoopPageCount(pins.length) },
-        (_, pageIndex) => Array.from(
-          { length: PIN_CAROUSEL_PAGE_SIZE },
-          (_, offset) => pins[
-            (pageIndex * PIN_CAROUSEL_PAGE_SIZE + offset) % pins.length
-          ],
-        ),
-      )
-    : [];
+  const pinPages = useMemo(() => Array.from(
+    { length: Math.ceil(pins.length / PIN_CAROUSEL_PAGE_SIZE) },
+    (_, pageIndex) => {
+      const start = pageIndex * PIN_CAROUSEL_PAGE_SIZE;
+      return pins.slice(start, start + PIN_CAROUSEL_PAGE_SIZE);
+    },
+  ), [pins]);
 
   const getCarouselSegmentWidth = () => {
     const carousel = carouselRef.current;
@@ -200,53 +187,80 @@ export function MusicExchange() {
     return carousel.scrollWidth / 3;
   };
 
-  const loadPins = async () => {
+  const loadPins = useCallback(async () => {
+    activePinsRef.current?.abort();
+    const request = new AbortController();
+    activePinsRef.current = request;
     setPinState("loading");
+
     try {
-      setPins(await fetchPublicPins());
+      const nextPins = await fetchPublicPins(request.signal);
+      if (request.signal.aborted) return;
+      setPins(nextPins);
       setPinState("success");
     } catch {
-      setPinState("error");
+      if (!request.signal.aborted) setPinState("error");
     }
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-
-    void fetchPublicPins()
-      .then((nextPins) => {
-        if (cancelled) return;
-        setPins(nextPins);
-        setPinState("success");
-      })
-      .catch(() => {
-        if (!cancelled) setPinState("error");
-      });
-
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   useEffect(() => {
     const carousel = carouselRef.current;
-    if (!carousel || !pinPages.length) return;
+    if (!carousel) return;
 
-    const segmentWidth = () => getCarouselSegmentWidth();
-    if (!carousel.scrollLeft) carousel.scrollLeft = segmentWidth();
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      if (!activePinsRef.current) void loadPins();
+    }, { rootMargin: "400px 0px" });
+    observer.observe(carousel);
 
+    return () => {
+      observer.disconnect();
+      activePinsRef.current?.abort();
+      activePinsRef.current = null;
+    };
+  }, [loadPins]);
 
-    const intervalId = window.setInterval(() => {
-      const segment = segmentWidth();
-      if (!segment || isDraggingRef.current || paused || document.hidden || carousel.matches(":focus-within") || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel || !pinPages.length || pinState !== "success") return;
 
-      if (carousel.scrollLeft >= segment * 2) carousel.scrollLeft -= segment;
-      if (carousel.scrollLeft <= 0) carousel.scrollLeft += segment;
-      carousel.scrollLeft += 1;
-    }, 24);
+    const track = carousel.querySelector(".music-pin-track-loop");
+    if (!track) return;
 
-    return () => window.clearInterval(intervalId);
-  }, [pinPages.length, paused]);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let segment = 0;
+    let intervalId: number | undefined;
+    const measure = () => {
+      segment = getCarouselSegmentWidth();
+      if (!carousel.scrollLeft && segment) carousel.scrollLeft = segment;
+    };
+
+    const resizeObserver = new ResizeObserver(measure);
+    resizeObserver.observe(track);
+    resizeObserver.observe(carousel);
+
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      window.clearInterval(intervalId);
+      if (!entry.isIntersecting || paused) return;
+
+      intervalId = window.setInterval(() => {
+        if (!segment || isDraggingRef.current || document.hidden || reducedMotion.matches || carousel.matches(":focus-within")) return;
+
+        const position = carousel.scrollLeft;
+        carousel.scrollLeft = position >= segment * 2
+          ? position - segment + 1
+          : position <= 0 ? position + segment + 1 : position + 1;
+      }, 24);
+    });
+    visibilityObserver.observe(carousel);
+
+    return () => {
+      resizeObserver.disconnect();
+      visibilityObserver.disconnect();
+      window.clearInterval(intervalId);
+    };
+  }, [pinPages.length, pinState, paused]);
 
   const handleCarouselPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     const carousel = carouselRef.current;
@@ -433,13 +447,18 @@ export function MusicExchange() {
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      if (hasDrawnGiftRef.current) return;
-      hasDrawnGiftRef.current = true;
-      void drawRandomTrack();
-    }, 0);
+    const section = giftSectionRef.current;
+    if (!section) return;
 
-    return () => window.clearTimeout(timer);
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting || hasDrawnGiftRef.current) return;
+      hasDrawnGiftRef.current = true;
+      observer.disconnect();
+      void drawRandomTrack();
+    }, { rootMargin: "400px 0px" });
+    observer.observe(section);
+
+    return () => observer.disconnect();
   }, [drawRandomTrack]);
 
   return (
@@ -599,8 +618,9 @@ export function MusicExchange() {
           <div
             ref={carouselRef}
             className={"music-pin-carousel" + (isDragging ? " is-dragging" : "")}
+            role="group"
             tabIndex={0}
-            aria-label="Public pinned songs. Drag horizontally to explore."
+            aria-label="Public pinned songs. Use the arrow keys or drag horizontally to explore."
             onPointerDown={handleCarouselPointerDown}
             onPointerMove={handleCarouselPointerMove}
             onPointerUp={handleCarouselPointerEnd}
@@ -635,9 +655,9 @@ export function MusicExchange() {
               </div>
             ) : pins.length ? (
               <div className="music-pin-track-loop">
-                <MusicPinRail uniqueCount={pins.length} pages={pinPages} hidden />
-                <MusicPinRail uniqueCount={pins.length} pages={pinPages} />
-                <MusicPinRail uniqueCount={pins.length} pages={pinPages} hidden />
+                <MusicPinRail pages={pinPages} hidden />
+                <MusicPinRail pages={pinPages} />
+                <MusicPinRail pages={pinPages} hidden />
               </div>
             ) : (
               <div className="music-pin-empty">
@@ -654,7 +674,7 @@ export function MusicExchange() {
           </div>
         </section>
 
-        <section className="music-take-channel" aria-label="Take a song">
+        <section ref={giftSectionRef} className="music-take-channel" aria-label="Take a song">
           <div className="music-channel-head">
             <span>03 / Take</span>
             <p className="music-section-phrase">

@@ -1,13 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { preload } from "react-dom";
 import Link from "next/link";
-import {
-  useEffect,
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
 import {
   ArrowDown,
   ArrowUpRight,
@@ -101,19 +97,31 @@ function SkillsCarousel() {
     const carousel = carouselRef.current;
     if (!carousel) return;
 
-    const segmentWidth = () => carousel.scrollWidth / 3;
-    if (!carousel.scrollLeft) carousel.scrollLeft = segmentWidth();
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let intervalId: number | undefined;
+    const observer = new IntersectionObserver(([entry]) => {
+      window.clearInterval(intervalId);
+      if (!entry.isIntersecting) return;
 
-    const intervalId = window.setInterval(() => {
-      const segment = segmentWidth();
-      if (!segment || paused || document.hidden || carousel.matches(":focus-within") || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (!carousel.scrollLeft) carousel.scrollLeft = carousel.scrollWidth / 3;
+      if (paused) return;
 
-      if (carousel.scrollLeft >= segment * 2) carousel.scrollLeft -= segment;
-      if (carousel.scrollLeft <= 0) carousel.scrollLeft += segment;
-      if (!isDraggingRef.current) carousel.scrollLeft += 1;
-    }, 24);
+      intervalId = window.setInterval(() => {
+        if (document.hidden || reducedMotion.matches || isDraggingRef.current || carousel.matches(":focus-within")) return;
 
-    return () => window.clearInterval(intervalId);
+        const segment = carousel.scrollWidth / 3;
+        if (!segment) return;
+        if (carousel.scrollLeft >= segment * 2) carousel.scrollLeft -= segment;
+        if (carousel.scrollLeft <= 0) carousel.scrollLeft += segment;
+        carousel.scrollLeft += 1;
+      }, 24);
+    });
+    observer.observe(carousel);
+
+    return () => {
+      observer.disconnect();
+      window.clearInterval(intervalId);
+    };
   }, [paused]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -155,7 +163,8 @@ function SkillsCarousel() {
     <div
       ref={carouselRef}
       className={"skills-marquee" + (isDragging ? " is-dragging" : "")}
-      aria-label="Technical skills. Drag horizontally to explore."
+      role="group"
+      aria-label="Technical skills. Use the arrow keys or drag horizontally to explore."
       tabIndex={0}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -200,10 +209,11 @@ function ProjectTile({ project, index }: { project: Project; index: number }) {
               src={project.image}
               alt={project.imageAlt}
               fill
+              quality={project.featured ? 45 : 55}
               sizes={
                 project.featured
-                  ? "(max-width: 720px) 100vw, 66vw"
-                  : "(max-width: 720px) 100vw, 33vw"
+                  ? "(max-width: 680px) calc(100vw - 30px), (max-width: 900px) calc(100vw - 38px), (max-width: 1100px) calc(100vw - 411px), (max-width: 1288px) calc(65vw - 33.5px), 805px"
+                  : "(max-width: 680px) calc(100vw - 30px), (max-width: 900px) calc(50vw - 31px), (max-width: 1288px) calc(50vw - 37px), 607px"
               }
             />
           </div>
@@ -244,8 +254,33 @@ function ProjectTile({ project, index }: { project: Project; index: number }) {
     </ScrollReveal>
   );
 }
+
+const heroPortrait = "/images/samiyeel-hero-768.avif";
+const mobileHeroPortrait = "/images/samiyeel-hero-480.avif";
+const mobileHeroMedia = "(width <= 480px)";
+const desktopHeroMedia = "(width > 480px)";
+const heroPortraitSrcSet = [
+  heroPortrait + " 768w",
+  "/images/samiyeel-hero-1204.avif 1204w",
+].join(", ");
+
 export function PortfolioHome() {
   const [isProjectArchiveOpen, setIsProjectArchiveOpen] = useState(false);
+
+  preload(mobileHeroPortrait, {
+    as: "image",
+    type: "image/avif",
+    fetchPriority: "high",
+    media: mobileHeroMedia,
+  });
+  preload(heroPortrait, {
+    as: "image",
+    type: "image/avif",
+    fetchPriority: "high",
+    media: desktopHeroMedia,
+    imageSrcSet: heroPortraitSrcSet,
+    imageSizes: "100vw",
+  });
 
   return (
     <>
@@ -253,14 +288,17 @@ export function PortfolioHome() {
 
       <main>
         <section className="hero" aria-labelledby="hero-title">
-          <Image
-            className="hero-portrait"
-            src="/images/samiyeel-profile.webp"
-            alt="Portrait of Samiyeel Alim Binaaf, also known online as Pronaaf2k"
-            fill
-            priority
-            sizes="100vw"
-          />
+          <picture>
+            <source type="image/avif" media={mobileHeroMedia} srcSet={mobileHeroPortrait} />
+            <source type="image/avif" sizes="100vw" srcSet={heroPortraitSrcSet} />
+            <img
+              className="hero-portrait"
+              alt="Portrait of Samiyeel Alim Binaaf, also known online as Pronaaf2k"
+              fetchPriority="high"
+              decoding="async"
+              src="/images/samiyeel-hero-768.webp"
+            />
+          </picture>
           <div className="hero-wash" aria-hidden="true" />
 
           <div className="shell hero-inner">
@@ -376,7 +414,7 @@ export function PortfolioHome() {
               hidden={!isProjectArchiveOpen}
             >
               <div className="project-grid project-grid-archive">
-                {archivedProjects.map((project, index) => (
+                {isProjectArchiveOpen && archivedProjects.map((project, index) => (
                   <ProjectTile
                     key={project.slug}
                     project={project}
@@ -419,7 +457,7 @@ export function PortfolioHome() {
                 );
               })}
 
-              <Link className="about-loadout-link" href="/loadout">
+              <Link className="about-loadout-link" href="/loadout" prefetch={false}>
                 <span>Tools, desk, and competitive setup</span>
                 <strong>View loadout</strong>
                 <ArrowUpRight size={17} aria-hidden="true" />
